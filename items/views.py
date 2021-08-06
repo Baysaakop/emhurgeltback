@@ -107,6 +107,8 @@ class ItemViewSet(viewsets.ModelViewSet):
         is_brand = self.request.query_params.get('is_brand', None)
         category = self.request.query_params.get('category', None)
         tags = self.request.query_params.get('tags', None)
+        pricelow = self.request.query_params.get('pricelow', None)
+        pricehigh = self.request.query_params.get('pricehigh', None)
         order = self.request.query_params.get('order', None)
         if name is not None:
             queryset = queryset.filter(name__icontains=name).distinct()
@@ -118,6 +120,10 @@ class ItemViewSet(viewsets.ModelViewSet):
         if tags is not None:
             for tag in tags.split(","):
                 queryset = queryset.filter(tag__id=tag).distinct()
+        if pricelow is not None:
+            queryset = queryset.filter(price__gte=pricelow).distinct()
+        if pricehigh is not None:
+            queryset = queryset.filter(price__lt=pricehigh).distinct()
         if order is not None:
             queryset = queryset.order_by('-is_brand', order)
         return queryset

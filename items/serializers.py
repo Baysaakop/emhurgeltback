@@ -46,7 +46,7 @@ class ItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = Item
         fields = ('id', 'name', 'description', 'ingredients', 'usage', 'caution',
-                  'company', 'category', 'tag', 'price', 'shops', 'rating', 'total', 'is_brand', 'images', 'created_by', 'updated_by', 'created_at', 'updated_at')
+                  'company', 'category', 'tag', 'price', 'shops', 'rating', 'total', 'is_brand', 'images', 'video', 'poster', 'created_by', 'updated_by', 'created_at', 'updated_at')
 
 
 class PostSerializer(serializers.ModelSerializer):

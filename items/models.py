@@ -12,6 +12,10 @@ def item_directory_path(instance, filename):
     return 'items/{0}/{1}'.format(instance.id, filename)
 
 
+def poster_directory_path(instance, filename):
+    return 'posters/{0}/{1}'.format(instance.id, filename)
+
+
 def shop_directory_path(instance, filename):
     return 'shops/{0}/{1}'.format(instance.id, filename)
 
@@ -76,6 +80,9 @@ class Item(models.Model):
     total = models.IntegerField(default=0)
     is_brand = models.BooleanField(default=False)
     images = models.ManyToManyField(ItemImage, null=True, blank=True)
+    video = models.CharField(max_length=200, blank=True)
+    poster = models.ImageField(
+        upload_to=poster_directory_path, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey(
@@ -92,7 +99,7 @@ class Post(models.Model):
     content = RichTextField()
     thumbnail = models.ImageField(
         upload_to='posts/%Y/%m/%d', null=True, blank=True)
-    video = models.TextField(blank=True)
+    video = models.CharField(max_length=200, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(
         User, on_delete=models.SET_NULL, blank=True, null=True, related_name="post_created_by")

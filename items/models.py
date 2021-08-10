@@ -32,6 +32,7 @@ class Company(models.Model):
 
 class Category(models.Model):
     name = models.CharField(max_length=100)
+    name_en = models.CharField(max_length=100, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
 
     def __str__(self):
@@ -65,11 +66,17 @@ class ItemImage(models.Model):
 
 class Item(models.Model):
     name = models.CharField(max_length=100)
+    name_en = models.CharField(max_length=100, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
+    description_en = models.TextField(blank=True, null=True)
     ingredients = models.TextField(blank=True, null=True)
+    ingredients_en = models.TextField(blank=True, null=True)
     usage = models.TextField(blank=True, null=True)
+    usage_en = models.TextField(blank=True, null=True)
     caution = models.TextField(blank=True, null=True)
+    caution_en = models.TextField(blank=True, null=True)
     storage = models.TextField(blank=True, null=True)
+    storage_en = models.TextField(blank=True, null=True)
     company = models.ForeignKey(
         Company, on_delete=models.CASCADE, null=True, blank=True)
     category = models.ManyToManyField(Category, null=True, blank=True)

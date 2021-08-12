@@ -19,7 +19,7 @@ class CategorySerializer(serializers.ModelSerializer):
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
-        fields = ('id', 'name', 'description')
+        fields = ('id', 'name', 'name_en', 'description')
 
 
 class ShopSerializer(serializers.ModelSerializer):

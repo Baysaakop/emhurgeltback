@@ -73,6 +73,9 @@ class Order(models.Model):
     on_delivery_at = models.DateTimeField(null=True, blank=True)
     successful_at = models.DateTimeField(null=True, blank=True)
 
+    def __str__(self):
+        return self.ref
+
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):

@@ -90,9 +90,13 @@ class OrderViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = Order.objects.all().order_by('-created_at')
         user = self.request.query_params.get('user', None)
+        state = self.request.query_params.get('state', None)
         if user is not None:
             queryset = queryset.filter(
-                user__id=user).distinct().order_by('state', 'created_at')
+                user__id=user).distinct().order_by('state', '-created_at')
+        if state is not None:
+            queryset = queryset.filter(
+                state=state).distinct().order_by('created_at')
         return queryset
 
     def create(self, request, *args, **kwargs):
@@ -122,15 +126,25 @@ class OrderViewSet(viewsets.ModelViewSet):
 
     def update(self, request, *args, **kwargs):
         order = self.get_object()
-        if 'on_delivery' in request.data:
+        state = request.data['state']
+        if state == "1":
+            # Payed
             order.state = "2"
-            order.on_delivery_at = datetime.datetime.now()
-        if 'successful' in request.data:
+        elif state == "2":
+            # On Delivery
             order.state = "3"
-            order.successful_at = datetime.datetime.now()
-        if 'unsuccessful' in request.data:
+            ##order.on_delivery_at = datetime.datetime.now()
+        elif state == "3":
+            # Delivered
             order.state = "4"
-            order.successful_at = datetime.datetime.now()
+            order.user.profile.bonus = order.user.profile.bonus + \
+                ((order.total - order.bonus) / 100 * order.user.profile.point)
+            order.user.save()
+        elif state == "5":
+            # Declined
+            order.state = "5"
+            order.user.profile.bonus = order.user.profile.bonus + order.bonus
+            order.user.save()
         order.save()
         serializer = OrderSerializer(order)
         headers = self.get_success_headers(serializer.data)

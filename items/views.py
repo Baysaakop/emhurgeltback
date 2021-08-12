@@ -1,3 +1,4 @@
+from django.db.models.fields.files import ImageField
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
@@ -134,14 +135,28 @@ class ItemViewSet(viewsets.ModelViewSet):
             name=request.data['name'],
             created_by=user
         )
+        if 'name_en' in request.data:
+            item.name_en = request.data['name_en']
         if 'description' in request.data:
             item.description = request.data['description']
+        if 'description_en' in request.data:
+            item.description_en = request.data['description_en']
         if 'ingredients' in request.data:
             item.ingredients = request.data['ingredients']
+        if 'ingredients_en' in request.data:
+            item.ingredients_en = request.data['ingredients_en']
         if 'usage' in request.data:
             item.usage = request.data['usage']
+        if 'usage_en' in request.data:
+            item.usage_en = request.data['usage_en']
         if 'caution' in request.data:
             item.caution = request.data['caution']
+        if 'caution_en' in request.data:
+            item.caution_en = request.data['caution_en']
+        if 'storage' in request.data:
+            item.storage = request.data['storage']
+        if 'storage_en' in request.data:
+            item.storage_en = request.data['storage_en']
         if 'price' in request.data:
             item.price = request.data['price']
         if 'is_brand' in request.data:
@@ -164,8 +179,14 @@ class ItemViewSet(viewsets.ModelViewSet):
             shops = request.data['shop'].split(',')
             for shop in shops:
                 item.shops.add(Shop.objects.filter(id=int(shop))[0])
-        if 'image' in request.data:
-            item.image = request.data['image']
+        # if 'images' in request.data:
+            # images = dict((request.data).lists())['images']
+            # for image in images:
+            #     print(image)
+            #     img = ItemImage.objects.create(image=image)
+            #     item.images.add(img)
+        if 'poster' in request.data:
+            item.poster = request.data['poster']
         item.save()
         serializer = ItemSerializer(item)
         headers = self.get_success_headers(serializer.data)

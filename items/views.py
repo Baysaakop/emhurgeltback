@@ -1,16 +1,18 @@
+import json
 from django.db.models.fields.files import ImageField
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
-from .models import Company, Category, ItemImage, Shop, Tag, Item, Post
-from .serializers import CompanySerializer, CategorySerializer, ShopSerializer, TagSerializer, ItemSerializer, ItemImageSerializer, PostSerializer
+from rest_framework.parsers import FileUploadParser
+from .models import Company, Category, Shop, Tag, Item, Post
+from .serializers import CompanySerializer, CategorySerializer, ShopSerializer, TagSerializer, ItemSerializer, PostSerializer
 from rest_framework import viewsets, filters
 from addresses.models import Address, City, District
 
 
 class CompanyViewSet(viewsets.ModelViewSet):
     serializer_class = CompanySerializer
-    queryset = Company.objects.all()
+    queryset = Company.objects.all().order_by('id')
 
     def create(self, request, *args, **kwargs):
         company = Company.objects.create(
@@ -41,17 +43,17 @@ class CompanyViewSet(viewsets.ModelViewSet):
 
 class CategoryViewSet(viewsets.ModelViewSet):
     serializer_class = CategorySerializer
-    queryset = Category.objects.all()
+    queryset = Category.objects.all().order_by('id')
 
 
 class TagViewSet(viewsets.ModelViewSet):
     serializer_class = TagSerializer
-    queryset = Tag.objects.all()
+    queryset = Tag.objects.all().order_by('id')
 
 
 class ShopViewSet(viewsets.ModelViewSet):
     serializer_class = ShopSerializer
-    queryset = Shop.objects.all()
+    queryset = Shop.objects.all().order_by('id')
 
     def create(self, request, *args, **kwargs):
         shop = Shop.objects.create(
@@ -100,7 +102,7 @@ class ShopViewSet(viewsets.ModelViewSet):
 
 class ItemViewSet(viewsets.ModelViewSet):
     serializer_class = ItemSerializer
-    queryset = Item.objects.all()
+    queryset = Item.objects.all().order_by('-is_brand', '-created_at')
 
     def get_queryset(self):
         queryset = Item.objects.all().order_by('-is_brand', '-created_at')
@@ -179,12 +181,14 @@ class ItemViewSet(viewsets.ModelViewSet):
             shops = request.data['shop'].split(',')
             for shop in shops:
                 item.shops.add(Shop.objects.filter(id=int(shop))[0])
-        # if 'images' in request.data:
-            # images = dict((request.data).lists())['images']
-            # for image in images:
-            #     print(image)
-            #     img = ItemImage.objects.create(image=image)
-            #     item.images.add(img)
+        if 'image1' in request.data:
+            item.image1 = request.data['image1']
+        if 'image2' in request.data:
+            item.image2 = request.data['image2']
+        if 'image3' in request.data:
+            item.image3 = request.data['image3']
+        if 'image4' in request.data:
+            item.image4 = request.data['image4']
         if 'poster' in request.data:
             item.poster = request.data['poster']
         item.save()
@@ -198,16 +202,35 @@ class ItemViewSet(viewsets.ModelViewSet):
         item.updated_by = user
         if 'name' in request.data:
             item.name = request.data['name']
+        if 'name_en' in request.data:
+            item.name_en = request.data['name_en']
         if 'description' in request.data:
             item.description = request.data['description']
+        if 'description_en' in request.data:
+            item.description_en = request.data['description_en']
         if 'ingredients' in request.data:
             item.ingredients = request.data['ingredients']
+        if 'ingredients_en' in request.data:
+            item.ingredients_en = request.data['ingredients_en']
         if 'usage' in request.data:
             item.usage = request.data['usage']
+        if 'usage_en' in request.data:
+            item.usage_en = request.data['usage_en']
         if 'caution' in request.data:
             item.caution = request.data['caution']
+        if 'caution_en' in request.data:
+            item.caution_en = request.data['caution_en']
+        if 'storage' in request.data:
+            item.storage = request.data['storage']
+        if 'storage_en' in request.data:
+            item.storage_en = request.data['storage_en']
         if 'price' in request.data:
-            item.price = float(request.data['price'])
+            item.price = request.data['price']
+        if 'is_brand' in request.data:
+            if request.data['is_brand'] == 'true':
+                item.is_brand = True
+            else:
+                item.is_brand = False
         if 'company' in request.data:
             item.company = Company.objects.filter(
                 id=int(request.data['company']))[0]
@@ -221,17 +244,24 @@ class ItemViewSet(viewsets.ModelViewSet):
             item.tag.clear()
             for tag in tags:
                 item.tag.add(Tag.objects.filter(id=int(tag))[0])
-        if 'image' in request.data:
-            item.image = request.data['image']
+        if 'shop' in request.data:
+            shops = request.data['shop'].split(',')
+            for shop in shops:
+                item.shops.add(Shop.objects.filter(id=int(shop))[0])
+        if 'image1' in request.data:
+            item.image1 = request.data['image1']
+        if 'image2' in request.data:
+            item.image2 = request.data['image2']
+        if 'image3' in request.data:
+            item.image3 = request.data['image3']
+        if 'image4' in request.data:
+            item.image4 = request.data['image4']
+        if 'poster' in request.data:
+            item.poster = request.data['poster']
         item.save()
         serializer = ItemSerializer(item)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_200_OK, headers=headers)
-
-
-class ItemImageViewSet(viewsets.ModelViewSet):
-    serializer_class = ItemImageSerializer
-    queryset = ItemImage.objects.all()
 
 
 class PostViewSet(viewsets.ModelViewSet):

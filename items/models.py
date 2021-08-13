@@ -60,11 +60,6 @@ class Shop(models.Model):
         return self.name
 
 
-class ItemImage(models.Model):
-    image = models.ImageField(
-        upload_to=item_directory_path, null=True, blank=True)
-
-
 class Item(models.Model):
     name = models.CharField(max_length=100)
     name_en = models.CharField(max_length=100, blank=True, null=True)
@@ -87,8 +82,15 @@ class Item(models.Model):
     rating = models.IntegerField(default=0)
     total = models.IntegerField(default=0)
     is_brand = models.BooleanField(default=False)
-    images = models.ManyToManyField(ItemImage, null=True, blank=True)
     video = models.CharField(max_length=200, blank=True)
+    image1 = models.ImageField(
+        upload_to=item_directory_path, null=True, blank=True)
+    image2 = models.ImageField(
+        upload_to=item_directory_path, null=True, blank=True)
+    image3 = models.ImageField(
+        upload_to=item_directory_path, null=True, blank=True)
+    image4 = models.ImageField(
+        upload_to=item_directory_path, null=True, blank=True)
     poster = models.ImageField(
         upload_to=poster_directory_path, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)

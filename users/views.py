@@ -2,16 +2,35 @@ import datetime
 from django.contrib.auth.models import User
 from rest_framework import status
 from rest_framework.response import Response
-from .models import Profile, CartItem, Order
-from .serializers import UserSerializer, ProfileSerializer, CartItemSerializer, OrderSerializer
+from .models import Profile, CartItem, Order, City, District, Section, Building
+from .serializers import UserSerializer, ProfileSerializer, CartItemSerializer, OrderSerializer, CitySerializer, DistrictSerializer, SectionSerializer, BuildingSerializer
 from rest_framework import viewsets
 from allauth.socialaccount.providers.facebook.views import FacebookOAuth2Adapter
 from dj_rest_auth.registration.views import SocialLoginView
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from allauth.account.adapter import get_adapter
-from addresses.models import Address, City, District
 from items.models import Item
 from rest_framework.authtoken.models import Token
+
+
+class CityViewSet(viewsets.ModelViewSet):
+    serializer_class = CitySerializer
+    queryset = City.objects.all()
+
+
+class DistrictViewSet(viewsets.ModelViewSet):
+    serializer_class = DistrictSerializer
+    queryset = District.objects.all()
+
+
+class SectionViewSet(viewsets.ModelViewSet):
+    serializer_class = SectionSerializer
+    queryset = Section.objects.all()
+
+
+class BuildingViewSet(viewsets.ModelViewSet):
+    serializer_class = BuildingSerializer
+    queryset = Building.objects.all()
 
 
 class CartItemViewSet(viewsets.ModelViewSet):
@@ -37,14 +56,15 @@ class ProfileViewSet(viewsets.ModelViewSet):
         if 'birth_date' in request.data:
             profile.birth_date = request.data['birth_date']
         if 'address' in request.data:
-            address, created = Address.objects.get_or_create(
-                city=City.objects.get(id=int(request.data['city'])),
-                district=District.objects.get(
-                    id=int(request.data['district'])),
-                section=request.data['section'],
-                address=request.data['address']
-            )
-            profile.address = address
+            profile.address = request.data['address']
+            # address, created = Address.objects.get_or_create(
+            #     city=City.objects.get(id=int(request.data['city'])),
+            #     district=District.objects.get(
+            #         id=int(request.data['district'])),
+            #     section=request.data['section'],
+            #     address=request.data['address']
+            # )
+            # profile.address = address
         if 'favorite' in request.data:
             item = Item.objects.get(id=int(request.data['item']))
             if item in profile.favorite.all():

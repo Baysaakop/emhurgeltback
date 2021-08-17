@@ -3,9 +3,38 @@ from django.contrib.auth.models import User
 from django.contrib.auth.forms import PasswordResetForm
 from django.conf import settings
 from django.utils.translation import gettext as _
-from .models import Profile, CartItem, Order
+from .models import Profile, CartItem, Order, City, District, Section, Building
 from items.serializers import ItemSerializer
-from addresses.serializers import AddressSerializer
+
+
+class CitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = City
+        fields = ('id', 'name')
+
+
+class DistrictSerializer(serializers.ModelSerializer):
+    city = CitySerializer(read_only=True)
+
+    class Meta:
+        model = District
+        fields = ('id', 'city', 'name')
+
+
+class SectionSerializer(serializers.ModelSerializer):
+    district = DistrictSerializer(read_only=True)
+
+    class Meta:
+        model = Section
+        fields = ('id', 'district', 'name')
+
+
+class BuildingSerializer(serializers.ModelSerializer):
+    section = SectionSerializer(read_only=True)
+
+    class Meta:
+        model = Building
+        fields = ('id', 'section', 'name')
 
 
 class CartItemSerializer(serializers.ModelSerializer):
@@ -17,7 +46,6 @@ class CartItemSerializer(serializers.ModelSerializer):
 
 
 class ProfileSerializer(serializers.ModelSerializer):
-    address = AddressSerializer(read_only=True)
     favorite = ItemSerializer(read_only=True, many=True)
     cart = CartItemSerializer(read_only=True, many=True)
 

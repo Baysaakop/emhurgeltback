@@ -5,7 +5,6 @@ from django.db.models.expressions import F
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from items.models import Item
-from addresses.models import Address
 import random
 
 USER_ROLES = (
@@ -32,6 +31,37 @@ def user_directory_path(instance, filename):
     return 'users/{0}/{1}'.format(instance.user.id, filename)
 
 
+class City(models.Model):
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+
+
+class District(models.Model):
+    city = models.ForeignKey(City, on_delete=models.CASCADE)
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.city.name + ", " + self.name
+
+
+class Section(models.Model):
+    district = models.ForeignKey(District, on_delete=models.CASCADE)
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.district.city.name + ", " + self.district.name + ", " + self.name
+
+
+class Building(models.Model):
+    section = models.ForeignKey(Section, on_delete=models.CASCADE)
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.section.district.city.name + ", " + self.section.district.name + ", " + self.section.name + ", " + self.name
+
+
 class CartItem(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     count = models.IntegerField(default=1)
@@ -41,8 +71,7 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     description = models.TextField(max_length=500, blank=True)
     phone_number = models.CharField(max_length=30, blank=True)
-    address = models.ForeignKey(
-        Address, on_delete=models.CASCADE, null=True, blank=True)
+    address = models.TextField(blank=True)
     favorite = models.ManyToManyField(Item, null=True, blank=True)
     cart = models.ManyToManyField(CartItem, null=True, blank=True)
     point = models.IntegerField(default=2)

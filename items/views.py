@@ -8,6 +8,7 @@ from .models import Company, Category, Shop, Tag, Item, Post
 from .serializers import CompanySerializer, CategorySerializer, ShopSerializer, TagSerializer, ItemSerializer, PostSerializer
 from rest_framework import viewsets, filters
 from addresses.models import Address, City, District
+from rest_framework.permissions import IsAuthenticated
 
 
 class CompanyViewSet(viewsets.ModelViewSet):
@@ -172,7 +173,8 @@ class ItemViewSet(viewsets.ModelViewSet):
         if 'category' in request.data:
             categories = request.data['category'].split(',')
             for cat in categories:
-                item.category.add(Category.objects.filter(id=int(cat))[0])
+                item.category.add(
+                    Category.objects.filter(id=int(cat))[0])
         if 'tag' in request.data:
             tags = request.data['tag'].split(',')
             for tag in tags:

@@ -9,7 +9,6 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('addresses', '0003_auto_20210607_1623'),
         ('items', '0016_auto_20210608_1506'),
         ('users', '0005_auto_20201212_0434'),
     ]
@@ -18,15 +17,18 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='CartItem',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.AutoField(auto_created=True,
+                                        primary_key=True, serialize=False, verbose_name='ID')),
                 ('count', models.IntegerField(default=1)),
-                ('item', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='items.item')),
+                ('item', models.ForeignKey(
+                    on_delete=django.db.models.deletion.CASCADE, to='items.item')),
             ],
         ),
         migrations.AddField(
             model_name='profile',
             name='address',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='addresses.address'),
+            field=models.ForeignKey(
+                blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='addresses.address'),
         ),
         migrations.AddField(
             model_name='profile',
@@ -36,7 +38,8 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='profile',
             name='favorite',
-            field=models.ManyToManyField(blank=True, null=True, to='items.Item'),
+            field=models.ManyToManyField(
+                blank=True, null=True, to='items.Item'),
         ),
         migrations.AddField(
             model_name='profile',
@@ -46,18 +49,23 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Order',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.AutoField(auto_created=True,
+                                        primary_key=True, serialize=False, verbose_name='ID')),
                 ('total', models.IntegerField(default=0)),
-                ('state', models.CharField(choices=[('1', 'created'), ('2', 'on_delivery'), ('3', 'successful'), ('4', 'unsuccessful')], default=1, max_length=20)),
+                ('state', models.CharField(choices=[('1', 'created'), ('2', 'on_delivery'), (
+                    '3', 'successful'), ('4', 'unsuccessful')], default=1, max_length=20)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('confirmed_at', models.DateTimeField(auto_now=True)),
-                ('items', models.ManyToManyField(blank=True, null=True, to='users.CartItem')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                ('items', models.ManyToManyField(
+                    blank=True, null=True, to='users.CartItem')),
+                ('user', models.ForeignKey(
+                    on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
         ),
         migrations.AddField(
             model_name='profile',
             name='cart',
-            field=models.ManyToManyField(blank=True, null=True, to='users.CartItem'),
+            field=models.ManyToManyField(
+                blank=True, null=True, to='users.CartItem'),
         ),
     ]

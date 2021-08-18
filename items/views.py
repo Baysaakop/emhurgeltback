@@ -1,5 +1,3 @@
-import json
-from django.db.models.fields.files import ImageField
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
@@ -7,8 +5,6 @@ from rest_framework.parsers import FileUploadParser
 from .models import Company, Category, Shop, Tag, Item, Post
 from .serializers import CompanySerializer, CategorySerializer, ShopSerializer, TagSerializer, ItemSerializer, PostSerializer
 from rest_framework import viewsets, filters
-from addresses.models import Address, City, District
-from rest_framework.permissions import IsAuthenticated
 
 
 class CompanyViewSet(viewsets.ModelViewSet):
@@ -55,50 +51,6 @@ class TagViewSet(viewsets.ModelViewSet):
 class ShopViewSet(viewsets.ModelViewSet):
     serializer_class = ShopSerializer
     queryset = Shop.objects.all().order_by('id')
-
-    def create(self, request, *args, **kwargs):
-        shop = Shop.objects.create(
-            name=request.data['name']
-        )
-        if 'phone_number' in request.data:
-            shop.phone_number = request.data['phone_number']
-        if 'address' in request.data:
-            address, created = Address.objects.get_or_create(
-                city=City.objects.get(id=int(request.data['city'])),
-                district=District.objects.get(
-                    id=int(request.data['district'])),
-                section=request.data['section'],
-                address=request.data['address']
-            )
-            shop.address = address
-        if 'image' in request.data:
-            shop.image = request.data['image']
-        shop.save()
-        serializer = ShopSerializer(shop)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-
-    def update(self, request, *args, **kwargs):
-        shop = self.get_object()
-        if 'name' in request.data:
-            shop.name = request.data['name']
-        if 'phone_number' in request.data:
-            shop.phone_number = request.data['phone_number']
-        if 'address' in request.data:
-            address, created = Address.objects.get_or_create(
-                city=City.objects.get(id=int(request.data['city'])),
-                district=District.objects.get(
-                    id=int(request.data['district'])),
-                section=request.data['section'],
-                address=request.data['address']
-            )
-            shop.address = address
-        if 'image' in request.data:
-            shop.image = request.data['image']
-        shop.save()
-        serializer = ShopSerializer(shop)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_200_OK, headers=headers)
 
 
 class ItemViewSet(viewsets.ModelViewSet):

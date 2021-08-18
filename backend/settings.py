@@ -47,7 +47,7 @@ INSTALLED_APPS = [
     'storages',
     'users',
     'items',
-    'addresses'
+    # 'addresses'
 ]
 
 SITE_ID = 2

@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from rest_framework.authtoken.models import Token
 from .models import Company, Category, Tag, Shop, Item, Post
-from addresses.serializers import AddressSerializer
 
 
 class CompanySerializer(serializers.ModelSerializer):
@@ -23,8 +22,6 @@ class TagSerializer(serializers.ModelSerializer):
 
 
 class ShopSerializer(serializers.ModelSerializer):
-    address = AddressSerializer(read_only=True)
-
     class Meta:
         model = Shop
         fields = ('id', 'name', 'phone_number', 'address', 'image')

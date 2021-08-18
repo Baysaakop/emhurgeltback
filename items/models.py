@@ -1,7 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
 from djrichtextfield.models import RichTextField
-from addresses.models import Address
 
 
 def company_directory_path(instance, filename):
@@ -51,8 +50,7 @@ class Tag(models.Model):
 class Shop(models.Model):
     name = models.CharField(max_length=100)
     phone_number = models.CharField(max_length=50)
-    address = models.ForeignKey(
-        Address, on_delete=models.CASCADE, blank=True, null=True)
+    address = models.TextField(blank=True)
     image = models.ImageField(
         upload_to=shop_directory_path, null=True, blank=True)
 

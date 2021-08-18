@@ -6,6 +6,7 @@ from .models import Profile, CartItem, Order, City, District, Section, Building
 from .serializers import UserSerializer, ProfileSerializer, CartItemSerializer, OrderSerializer, CitySerializer, DistrictSerializer, SectionSerializer, BuildingSerializer
 from rest_framework import viewsets
 from allauth.socialaccount.providers.facebook.views import FacebookOAuth2Adapter
+from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from dj_rest_auth.registration.views import SocialLoginView
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from allauth.account.adapter import get_adapter
@@ -173,6 +174,15 @@ class OrderViewSet(viewsets.ModelViewSet):
 
 class FacebookLogin(SocialLoginView):
     adapter_class = FacebookOAuth2Adapter
+    callback_url = 'https://emhurgelt.mn/'
+    client_class = OAuth2Client
+
+    def process_login(self):
+        get_adapter(self.request).login(self.request, self.user)
+
+
+class GoogleLogin(SocialLoginView):
+    adapter_class = GoogleOAuth2Adapter
     callback_url = 'https://emhurgelt.mn/'
     client_class = OAuth2Client
 

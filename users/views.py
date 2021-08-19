@@ -16,32 +16,104 @@ from rest_framework.authtoken.models import Token
 
 class CityViewSet(viewsets.ModelViewSet):
     serializer_class = CitySerializer
-    queryset = City.objects.all()
+    queryset = City.objects.all().order_by('name')
 
 
 class DistrictViewSet(viewsets.ModelViewSet):
     serializer_class = DistrictSerializer
-    queryset = District.objects.all()
+    queryset = District.objects.all().order_by('name')
+
+    def create(self, request, *args, **kwargs):
+        if 'city' in request.data and 'name' in request.data:
+            city_id = int(request.data['city'])
+            city = City.objects.get(id=city_id)
+            district = District.objects.create(
+                city=city, name=request.data['name'])
+            serializer = DistrictSerializer(district)
+            headers = self.get_success_headers(serializer.data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        else:
+            return Response(status=status.HTTP_406_NOT_ACCEPTABLE)
+
+    def update(self, request, *args, **kwargs):
+        district = self.get_object()
+        if 'city' in request.data:
+            city_id = int(request.data['city'])
+            city = City.objects.get(id=city_id)
+            district.city = city
+        if 'name' in request.data:
+            district.name = request.data['name']
+        serializer = DistrictSerializer(district)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK, headers=headers)
 
 
 class SectionViewSet(viewsets.ModelViewSet):
     serializer_class = SectionSerializer
-    queryset = Section.objects.all()
+    queryset = Section.objects.all().order_by('name')
+
+    def create(self, request, *args, **kwargs):
+        if 'district' in request.data and 'name' in request.data:
+            district_id = int(request.data['district'])
+            district = District.objects.get(id=district_id)
+            section = Section.objects.create(
+                district=district, name=request.data['name'])
+            serializer = SectionSerializer(section)
+            headers = self.get_success_headers(serializer.data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        else:
+            return Response(status=status.HTTP_406_NOT_ACCEPTABLE)
+
+    def update(self, request, *args, **kwargs):
+        section = self.get_object()
+        if 'district' in request.data:
+            district_id = int(request.data['district'])
+            district = District.objects.get(id=district_id)
+            section.district = district
+        if 'name' in request.data:
+            section.name = request.data['name']
+        serializer = SectionSerializer(section)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK, headers=headers)
 
 
 class BuildingViewSet(viewsets.ModelViewSet):
     serializer_class = BuildingSerializer
-    queryset = Building.objects.all()
+    queryset = Building.objects.all().order_by('name')
+
+    def create(self, request, *args, **kwargs):
+        if 'section' in request.data and 'name' in request.data:
+            section_id = int(request.data['section'])
+            section = Section.objects.get(id=section_id)
+            building = Building.objects.create(
+                section=section, name=request.data['name'])
+            serializer = BuildingSerializer(building)
+            headers = self.get_success_headers(serializer.data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        else:
+            return Response(status=status.HTTP_406_NOT_ACCEPTABLE)
+
+    def update(self, request, *args, **kwargs):
+        building = self.get_object()
+        if 'section' in request.data:
+            section_id = int(request.data['section'])
+            section = Section.objects.get(id=section_id)
+            building.section = section
+        if 'name' in request.data:
+            building.name = request.data['name']
+        serializer = BuildingSerializer(building)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK, headers=headers)
 
 
 class CartItemViewSet(viewsets.ModelViewSet):
     serializer_class = CartItemSerializer
-    queryset = CartItem.objects.all()
+    queryset = CartItem.objects.all().order_by('id')
 
 
 class ProfileViewSet(viewsets.ModelViewSet):
     serializer_class = ProfileSerializer
-    queryset = Profile.objects.all()
+    queryset = Profile.objects.all().order_by('id')
 
     def update(self, request, *args, **kwargs):
         profile = self.get_object()
@@ -58,14 +130,6 @@ class ProfileViewSet(viewsets.ModelViewSet):
             profile.birth_date = request.data['birth_date']
         if 'address' in request.data:
             profile.address = request.data['address']
-            # address, created = Address.objects.get_or_create(
-            #     city=City.objects.get(id=int(request.data['city'])),
-            #     district=District.objects.get(
-            #         id=int(request.data['district'])),
-            #     section=request.data['section'],
-            #     address=request.data['address']
-            # )
-            # profile.address = address
         if 'favorite' in request.data:
             item = Item.objects.get(id=int(request.data['item']))
             if item in profile.favorite.all():
@@ -101,7 +165,7 @@ class ProfileViewSet(viewsets.ModelViewSet):
 
 class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
-    queryset = User.objects.all()
+    queryset = User.objects.all().order_by('id')
 
 
 class OrderViewSet(viewsets.ModelViewSet):

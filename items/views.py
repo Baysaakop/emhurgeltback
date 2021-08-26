@@ -55,12 +55,12 @@ class ShopViewSet(viewsets.ModelViewSet):
 
 class ItemViewSet(viewsets.ModelViewSet):
     serializer_class = ItemSerializer
-    queryset = Item.objects.all().order_by('-is_brand', '-created_at')
+    queryset = Item.objects.all().order_by('-is_featured', '-created_at')
 
     def get_queryset(self):
-        queryset = Item.objects.all().order_by('-is_brand', '-created_at')
+        queryset = Item.objects.all().order_by('-is_featured', '-created_at')
         name = self.request.query_params.get('name', None)
-        is_brand = self.request.query_params.get('is_brand', None)
+        is_featured = self.request.query_params.get('is_featured', None)
         category = self.request.query_params.get('category', None)
         tags = self.request.query_params.get('tags', None)
         pricelow = self.request.query_params.get('pricelow', None)
@@ -69,8 +69,8 @@ class ItemViewSet(viewsets.ModelViewSet):
         if name is not None:
             queryset = queryset.filter(name__icontains=name).distinct()
             # queryset = queryset.filter(Q(name__icontains=name) | Q(tag__name=name)).distinct()
-        if is_brand is not None:
-            queryset = queryset.filter(is_brand=True).distinct()
+        if is_featured is not None:
+            queryset = queryset.filter(is_featured=True).distinct()
         if category is not None:
             queryset = queryset.filter(category__id=category).distinct()
         if tags is not None:
@@ -81,7 +81,7 @@ class ItemViewSet(viewsets.ModelViewSet):
         if pricehigh is not None:
             queryset = queryset.filter(price__lt=pricehigh).distinct()
         if order is not None:
-            queryset = queryset.order_by('-is_brand', order)
+            queryset = queryset.order_by('-is_featured', order)
         return queryset
 
     def create(self, request, *args, **kwargs):
@@ -114,11 +114,11 @@ class ItemViewSet(viewsets.ModelViewSet):
             item.storage_en = request.data['storage_en']
         if 'price' in request.data:
             item.price = request.data['price']
-        if 'is_brand' in request.data:
-            if request.data['is_brand'] == 'true':
-                item.is_brand = True
+        if 'is_featured' in request.data:
+            if request.data['is_featured'] == 'true':
+                item.is_featured = True
             else:
-                item.is_brand = False
+                item.is_featured = False
         if 'company' in request.data:
             item.company = Company.objects.filter(
                 id=int(request.data['company']))[0]
@@ -180,11 +180,11 @@ class ItemViewSet(viewsets.ModelViewSet):
             item.storage_en = request.data['storage_en']
         if 'price' in request.data:
             item.price = request.data['price']
-        if 'is_brand' in request.data:
-            if request.data['is_brand'] == 'true':
-                item.is_brand = True
+        if 'is_featured' in request.data:
+            if request.data['is_featured'] == 'true':
+                item.is_featured = True
             else:
-                item.is_brand = False
+                item.is_featured = False
         if 'company' in request.data:
             item.company = Company.objects.filter(
                 id=int(request.data['company']))[0]

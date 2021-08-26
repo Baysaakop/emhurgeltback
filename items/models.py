@@ -79,7 +79,7 @@ class Item(models.Model):
     shops = models.ManyToManyField(Shop, null=True, blank=True)
     rating = models.IntegerField(default=0)
     total = models.IntegerField(default=0)
-    is_brand = models.BooleanField(default=False)
+    is_featured = models.BooleanField(default=False)
     video = models.CharField(max_length=200, blank=True)
     image1 = models.ImageField(
         upload_to=item_directory_path, null=True, blank=True)

@@ -23,6 +23,13 @@ class DistrictViewSet(viewsets.ModelViewSet):
     serializer_class = DistrictSerializer
     queryset = District.objects.all().order_by('name')
 
+    def get_queryset(self):
+        queryset = District.objects.all().order_by('name')
+        city = self.request.query_params.get('city', None)
+        if city is not None:
+            queryset = queryset.filter(city=int(city)).distinct()
+        return queryset
+
     def create(self, request, *args, **kwargs):
         if 'city' in request.data and 'name' in request.data:
             city_id = int(request.data['city'])
@@ -52,6 +59,13 @@ class SectionViewSet(viewsets.ModelViewSet):
     serializer_class = SectionSerializer
     queryset = Section.objects.all().order_by('name')
 
+    def get_queryset(self):
+        queryset = Section.objects.all().order_by('name')
+        district = self.request.query_params.get('district', None)
+        if district is not None:
+            queryset = queryset.filter(district=int(district)).distinct()
+        return queryset
+
     def create(self, request, *args, **kwargs):
         if 'district' in request.data and 'name' in request.data:
             district_id = int(request.data['district'])
@@ -80,6 +94,13 @@ class SectionViewSet(viewsets.ModelViewSet):
 class BuildingViewSet(viewsets.ModelViewSet):
     serializer_class = BuildingSerializer
     queryset = Building.objects.all().order_by('name')
+
+    def get_queryset(self):
+        queryset = Building.objects.all().order_by('name')
+        section = self.request.query_params.get('section', None)
+        if section is not None:
+            queryset = queryset.filter(section=int(section)).distinct()
+        return queryset
 
     def create(self, request, *args, **kwargs):
         if 'section' in request.data and 'name' in request.data:

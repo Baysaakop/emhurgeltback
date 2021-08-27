@@ -81,7 +81,7 @@ class ItemViewSet(viewsets.ModelViewSet):
         if pricehigh is not None:
             queryset = queryset.filter(price__lt=pricehigh).distinct()
         if order is not None:
-            queryset = queryset.order_by('-is_featured', order)
+            queryset = queryset.order_by(order)
         return queryset
 
     def create(self, request, *args, **kwargs):

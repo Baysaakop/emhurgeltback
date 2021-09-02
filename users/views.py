@@ -188,6 +188,34 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     queryset = User.objects.all().order_by('id')
 
+def getBonus(items, percent):
+    bonus = 0
+    for order_item in items:
+        item = order_item.item
+        count = order_item.count
+        if (item.is_featured == True):
+            bonus = bonus + (item.price / 100) * percent * 1.5 * count
+        else: 
+            bonus = bonus + (item.price / 100) * percent * count
+        item.total = item.total - count
+        item.save()
+    
+    return bonus
+
+def updatePercent(user):
+    if user.profile.total > 5000:
+        user.profile.percent = 3
+        user.profile.level = 1
+    elif user.profile.total > 20000:
+        user.profile.percent = 4
+        user.profile.level = 2
+    elif user.profile.total > 50000:
+        user.profile.percent = 5
+        user.profile.level = 3
+    elif user.profile.total > 100000:
+        user.profile.percent = 6
+        user.profile.level = 4
+    user.save()
 
 class OrderViewSet(viewsets.ModelViewSet):
     serializer_class = OrderSerializer
@@ -243,9 +271,11 @@ class OrderViewSet(viewsets.ModelViewSet):
         elif state == "3":
             # Delivered
             order.state = "4"
-            order.user.profile.bonus = order.user.profile.bonus + \
-                ((order.total - order.bonus) / 100 * order.user.profile.point)
+            bonus = getBonus(order.items.all(), order.user.profile.percent)
+            order.user.profile.bonus = order.user.profile.bonus + bonus
+            order.user.profile.total = order.user.profile.total + bonus
             order.user.save()
+            updatePercent(order.user)            
         elif state == "5":
             # Declined
             order.state = "5"
@@ -255,7 +285,6 @@ class OrderViewSet(viewsets.ModelViewSet):
         serializer = OrderSerializer(order)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_200_OK, headers=headers)
-
 
 class FacebookLogin(SocialLoginView):
     adapter_class = FacebookOAuth2Adapter

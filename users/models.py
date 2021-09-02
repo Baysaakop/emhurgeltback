@@ -75,8 +75,10 @@ class Profile(models.Model):
     address = models.TextField(blank=True)
     favorite = models.ManyToManyField(Item, null=True, blank=True)
     cart = models.ManyToManyField(CartItem, null=True, blank=True)
-    point = models.IntegerField(default=2)
+    level = models.IntegerField(default=0)
+    percent = models.IntegerField(default=2)
     bonus = models.IntegerField(default=0)
+    total = models.IntegerField(default=0)
     birth_date = models.DateField(null=True, blank=True)
     avatar = models.ImageField(
         upload_to=user_directory_path, null=True, blank=True)

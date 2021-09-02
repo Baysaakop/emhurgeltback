@@ -1,6 +1,6 @@
 import os
 import dotenv
-# import dj_database_url
+import dj_database_url
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -45,8 +45,8 @@ INSTALLED_APPS = [
     'django_filters',
     'djrichtextfield',
     'storages',
-    'users',
     'items',
+    'users',    
     # 'addresses'
 ]
 
@@ -90,10 +90,17 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'em_hurgelt_db',
+        'USER': 'postgres',
+        'PASSWORD': os.environ['DB_PASSWORD'],
+        'HOST': 'localhost',
+        'PORT': 5432,
     }
 }
+
+db_from_env = dj_database_url.config(conn_max_age=600)
+DATABASES['default'].update(db_from_env)
 
 # DATABASES['default'] = dj_database_url.config(
 #     conn_max_age=600, ssl_require=True)

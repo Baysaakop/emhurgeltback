@@ -31,7 +31,7 @@ class Company(models.Model):
 
 class Category(models.Model):
     name = models.CharField(max_length=100)
-    name_en = models.CharField(max_length=100, blank=True, null=True)
+    name_en = models.CharField(max_length=100, blank=True, null=True, db_column="name_en")
     description = models.TextField(blank=True, null=True)
 
     def __str__(self):
@@ -40,7 +40,7 @@ class Category(models.Model):
 
 class Tag(models.Model):
     name = models.CharField(max_length=100)
-    name_en = models.CharField(max_length=100, blank=True, null=True)
+    name_en = models.CharField(max_length=100, blank=True, null=True, db_column="name_en")
     description = models.TextField(blank=True, null=True)
 
     def __str__(self):
@@ -60,17 +60,17 @@ class Shop(models.Model):
 
 class Item(models.Model):
     name = models.CharField(max_length=100)
-    name_en = models.CharField(max_length=100, blank=True, null=True)
+    name_en = models.CharField(max_length=100, blank=True, null=True, db_column="name_en")
     description = models.TextField(blank=True, null=True)
-    description_en = models.TextField(blank=True, null=True)
+    description_en = models.TextField(blank=True, null=True, db_column="description_en")
     ingredients = models.TextField(blank=True, null=True)
-    ingredients_en = models.TextField(blank=True, null=True)
+    ingredients_en = models.TextField(blank=True, null=True, db_column="ingredients_en")
     usage = models.TextField(blank=True, null=True)
-    usage_en = models.TextField(blank=True, null=True)
+    usage_en = models.TextField(blank=True, null=True, db_column="usage_en")
     caution = models.TextField(blank=True, null=True)
-    caution_en = models.TextField(blank=True, null=True)
+    caution_en = models.TextField(blank=True, null=True, db_column="caution_en")
     storage = models.TextField(blank=True, null=True)
-    storage_en = models.TextField(blank=True, null=True)
+    storage_en = models.TextField(blank=True, null=True, db_column="storage_en")
     company = models.ForeignKey(
         Company, on_delete=models.CASCADE, null=True, blank=True)
     category = models.ManyToManyField(Category, null=True, blank=True)
@@ -78,7 +78,7 @@ class Item(models.Model):
     price = models.IntegerField(default=0)
     shops = models.ManyToManyField(Shop, null=True, blank=True)
     rating = models.IntegerField(default=0)
-    total = models.IntegerField(default=0)
+    count = models.IntegerField(default=0)
     is_featured = models.BooleanField(default=False)
     video = models.CharField(max_length=200, blank=True)
     image1 = models.ImageField(

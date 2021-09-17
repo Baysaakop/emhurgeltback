@@ -170,10 +170,10 @@ class ItemViewSet(viewsets.ModelViewSet):
             for s in subcategories:
                 item.subcategories.add(
                     SubCategory.objects.filter(id=int(s))[0])
-        if 'tag' in request.data:
-            tags = request.data['tag'].split(',')
+        if 'tags' in request.data:
+            tags = request.data['tags'].split(',')
             for tag in tags:
-                item.tag.add(Tag.objects.filter(id=int(tag))[0])
+                item.tags.add(Tag.objects.filter(id=int(tag))[0])
         if 'shop' in request.data:
             shops = request.data['shop'].split(',')
             for shop in shops:

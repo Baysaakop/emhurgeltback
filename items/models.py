@@ -29,7 +29,29 @@ class Company(models.Model):
         return self.name
 
 
+class Type(models.Model):
+    name = models.CharField(max_length=100)
+    name_en = models.CharField(max_length=100, blank=True, null=True, db_column="name_en")
+    description = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return self.name
+
+
 class Category(models.Model):
+    type = models.ForeignKey(
+        Type, on_delete=models.SET_NULL, null=True, blank=True)
+    name = models.CharField(max_length=100)
+    name_en = models.CharField(max_length=100, blank=True, null=True, db_column="name_en")
+    description = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return self.name
+
+
+class SubCategory(models.Model):
+    category = models.ForeignKey(
+        Category, on_delete=models.SET_NULL, null=True, blank=True)
     name = models.CharField(max_length=100)
     name_en = models.CharField(max_length=100, blank=True, null=True, db_column="name_en")
     description = models.TextField(blank=True, null=True)
@@ -73,8 +95,11 @@ class Item(models.Model):
     storage_en = models.TextField(blank=True, null=True, db_column="storage_en")
     company = models.ForeignKey(
         Company, on_delete=models.CASCADE, null=True, blank=True)
-    category = models.ManyToManyField(Category, null=True, blank=True)
-    tag = models.ManyToManyField(Tag, null=True, blank=True)
+    # category = models.ManyToManyField(Category, null=True, blank=True)
+    types = models.ManyToManyField(Type, null=True, blank=True)
+    categories = models.ManyToManyField(Category, null=True, blank=True)
+    subcategories = models.ManyToManyField(SubCategory, null=True, blank=True)
+    tags = models.ManyToManyField(Tag, null=True, blank=True)
     price = models.IntegerField(default=0)
     shops = models.ManyToManyField(Shop, null=True, blank=True)
     rating = models.IntegerField(default=0)

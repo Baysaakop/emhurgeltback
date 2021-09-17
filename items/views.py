@@ -2,8 +2,8 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework.parsers import FileUploadParser
-from .models import Company, Category, Shop, Tag, Item, Post
-from .serializers import CompanySerializer, CategorySerializer, ShopSerializer, TagSerializer, ItemSerializer, PostSerializer
+from .models import Company, Type, Category, SubCategory, Shop, Tag, Item, Post
+from .serializers import CompanySerializer, TypeSerializer, CategorySerializer, SubCategorySerializer, ShopSerializer, TagSerializer, ItemSerializer, PostSerializer
 from rest_framework import viewsets, filters
 
 
@@ -38,9 +38,34 @@ class CompanyViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK, headers=headers)
 
 
+class TypeViewSet(viewsets.ModelViewSet):
+    serializer_class = TypeSerializer
+    queryset = Type.objects.all().order_by('id')
+
+
 class CategoryViewSet(viewsets.ModelViewSet):
     serializer_class = CategorySerializer
     queryset = Category.objects.all().order_by('id')
+
+    def get_queryset(self):
+        queryset = Category.objects.all().order_by('id')
+        type = self.request.query_params.get('type', None)       
+        if type is not None:
+            queryset = queryset.filter(type=Type.objects.get(id=int(type))).distinct()       
+        return queryset
+
+
+class SubCategoryViewSet(viewsets.ModelViewSet):
+    serializer_class = SubCategorySerializer
+    queryset = SubCategory.objects.all().order_by('id')
+
+    def get_queryset(self):
+        queryset = SubCategory.objects.all().order_by('id')
+        category = self.request.query_params.get('category', None)       
+        if category is not None:
+            queryset = queryset.filter(category=Category.objects.get(id=int(category))).distinct()       
+        return queryset
+
 
 
 class TagViewSet(viewsets.ModelViewSet):
@@ -61,7 +86,9 @@ class ItemViewSet(viewsets.ModelViewSet):
         queryset = Item.objects.all().order_by('-is_featured', '-created_at')
         name = self.request.query_params.get('name', None)
         is_featured = self.request.query_params.get('is_featured', None)
+        type = self.request.query_params.get('type', None)
         category = self.request.query_params.get('category', None)
+        subcategory = self.request.query_params.get('subcategory', None)
         tags = self.request.query_params.get('tags', None)
         pricelow = self.request.query_params.get('pricelow', None)
         pricehigh = self.request.query_params.get('pricehigh', None)
@@ -71,8 +98,12 @@ class ItemViewSet(viewsets.ModelViewSet):
             # queryset = queryset.filter(Q(name__icontains=name) | Q(tag__name=name)).distinct()
         if is_featured is not None:
             queryset = queryset.filter(is_featured=True).distinct()
+        if type is not None:
+            queryset = queryset.filter(types__id=type).distinct()
         if category is not None:
-            queryset = queryset.filter(category__id=category).distinct()
+            queryset = queryset.filter(categories__id=category).distinct()
+        if subcategory is not None:
+            queryset = queryset.filter(subcategories__id=subcategory).distinct()
         if tags is not None:
             for tag in tags.split(","):
                 queryset = queryset.filter(tag__id=tag).distinct()

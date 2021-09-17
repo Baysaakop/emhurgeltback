@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from rest_framework.authtoken.models import Token
-from .models import Company, Category, Tag, Shop, Item, Post
+from .models import Company, Type, Category, SubCategory, Tag, Shop, Item, Post
 
 
 class CompanySerializer(serializers.ModelSerializer):
@@ -9,10 +9,22 @@ class CompanySerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'description', 'image')
 
 
+class TypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Type
+        fields = ('id', 'name', 'name_en', 'description')
+
+
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = ('id', 'name', 'name_en', 'description')
+        fields = ('id', 'type', 'name', 'name_en', 'description')
+
+
+class SubCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SubCategory
+        fields = ('id', 'category', 'name', 'name_en', 'description')
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -29,7 +41,7 @@ class ShopSerializer(serializers.ModelSerializer):
 
 class ItemSerializer(serializers.ModelSerializer):
     company = CompanySerializer(read_only=True)
-    category = CategorySerializer(read_only=True, many=True)
+    # category = CategorySerializer(read_only=True, many=True)
     tag = TagSerializer(read_only=True, many=True)
     shops = ShopSerializer(read_only=True, many=True)
 

@@ -41,14 +41,16 @@ class ShopSerializer(serializers.ModelSerializer):
 
 class ItemSerializer(serializers.ModelSerializer):
     company = CompanySerializer(read_only=True)
-    # category = CategorySerializer(read_only=True, many=True)
+    types = TypeSerializer(read_only=True, many=True)
+    categories = CategorySerializer(read_only=True, many=True)
+    subcategories = SubCategorySerializer(read_only=True, many=True)
     tag = TagSerializer(read_only=True, many=True)
     shops = ShopSerializer(read_only=True, many=True)
 
     class Meta:
         model = Item
         fields = ('id', 'name', 'name_en', 'description', 'description_en', 'ingredients', 'ingredients_en', 'usage', 'usage_en', 'caution', 'caution_en', 'storage', 'storage_en',
-                  'company', 'category', 'tag', 'price', 'shops', 'rating', 'count', 'is_featured', 'video', 'image1', 'image2', 'image3', 'image4', 'poster', 'created_by', 'updated_by', 'created_at', 'updated_at')
+                  'company', 'types', 'categories', 'subcategories', 'tag', 'price', 'shops', 'rating', 'count', 'is_featured', 'video', 'image1', 'image2', 'image3', 'image4', 'poster', 'created_by', 'updated_by', 'created_at', 'updated_at')
 
 
 class PostSerializer(serializers.ModelSerializer):

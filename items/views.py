@@ -155,11 +155,21 @@ class ItemViewSet(viewsets.ModelViewSet):
         if 'company' in request.data:
             item.company = Company.objects.filter(
                 id=int(request.data['company']))[0]
-        if 'category' in request.data:
-            categories = request.data['category'].split(',')
-            for cat in categories:
-                item.category.add(
-                    Category.objects.filter(id=int(cat))[0])
+        if 'types' in request.data:
+            types = request.data['types'].split(',')
+            for t in types:
+                item.types.add(
+                    Type.objects.filter(id=int(t))[0])
+        if 'categories' in request.data:
+            categories = request.data['categories'].split(',')
+            for c in categories:
+                item.categories.add(
+                    Category.objects.filter(id=int(c))[0])
+        if 'subcategories' in request.data:
+            subcategories = request.data['subcategories'].split(',')
+            for s in subcategories:
+                item.subcategories.add(
+                    SubCategory.objects.filter(id=int(s))[0])
         if 'tag' in request.data:
             tags = request.data['tag'].split(',')
             for tag in tags:

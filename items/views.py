@@ -104,9 +104,9 @@ class ItemViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(categories__id=category).distinct()
         if subcategory is not None:
             queryset = queryset.filter(subcategories__id=subcategory).distinct()
-        if tags is not None:
-            for tag in tags.split(","):
-                queryset = queryset.filter(tag__id=tag).distinct()
+        # if tags is not None:
+        #     for tag in tags.split(","):
+        #         queryset = queryset.filter(tag__id=tag).distinct()
         if pricelow is not None:
             queryset = queryset.filter(price__gte=pricelow).distinct()
         if pricehigh is not None:
@@ -170,10 +170,10 @@ class ItemViewSet(viewsets.ModelViewSet):
             for s in subcategories:
                 item.subcategories.add(
                     SubCategory.objects.filter(id=int(s))[0])
-        if 'tags' in request.data:
-            tags = request.data['tags'].split(',')
-            for tag in tags:
-                item.tags.add(Tag.objects.filter(id=int(tag))[0])
+        # if 'tags' in request.data:
+        #     tags = request.data['tags'].split(',')
+        #     for tag in tags:
+        #         item.tags.add(Tag.objects.filter(id=int(tag))[0])
         if 'shop' in request.data:
             shops = request.data['shop'].split(',')
             for shop in shops:
@@ -233,16 +233,26 @@ class ItemViewSet(viewsets.ModelViewSet):
         if 'company' in request.data:
             item.company = Company.objects.filter(
                 id=int(request.data['company']))[0]
-        if 'category' in request.data:
-            categories = request.data['category'].split(',')
-            item.category.clear()
-            for cat in categories:
-                item.category.add(Category.objects.filter(id=int(cat))[0])
-        if 'tag' in request.data:
-            tags = request.data['tag'].split(',')
-            item.tag.clear()
-            for tag in tags:
-                item.tag.add(Tag.objects.filter(id=int(tag))[0])
+        if 'types' in request.data:
+            types = request.data['types'].split(',')
+            for t in types:
+                item.types.add(
+                    Type.objects.filter(id=int(t))[0])
+        if 'categories' in request.data:
+            categories = request.data['categories'].split(',')
+            for c in categories:
+                item.categories.add(
+                    Category.objects.filter(id=int(c))[0])
+        if 'subcategories' in request.data:
+            subcategories = request.data['subcategories'].split(',')
+            for s in subcategories:
+                item.subcategories.add(
+                    SubCategory.objects.filter(id=int(s))[0])
+        # if 'tag' in request.data:
+        #     tags = request.data['tag'].split(',')
+        #     item.tag.clear()
+        #     for tag in tags:
+        #         item.tag.add(Tag.objects.filter(id=int(tag))[0])
         if 'shop' in request.data:
             shops = request.data['shop'].split(',')
             for shop in shops:

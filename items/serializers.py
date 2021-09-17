@@ -44,7 +44,7 @@ class ItemSerializer(serializers.ModelSerializer):
     types = TypeSerializer(read_only=True, many=True)
     categories = CategorySerializer(read_only=True, many=True)
     subcategories = SubCategorySerializer(read_only=True, many=True)
-    tag = TagSerializer(read_only=True, many=True)
+    tags = TagSerializer(read_only=True, many=True)
     shops = ShopSerializer(read_only=True, many=True)
 
     class Meta:

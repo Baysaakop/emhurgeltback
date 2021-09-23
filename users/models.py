@@ -1,7 +1,5 @@
-from re import T
 from django.db import models
 from django.contrib.auth.models import User
-from django.db.models.expressions import F
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from items.models import Item
@@ -9,8 +7,8 @@ import random
 
 USER_ROLES = (
     ("1", "admin"),
-    ("2", "moderator"),
-    ("3", "user"),
+    ("2", "staff"),
+    ("3", "customer"),
 )
 
 ORDER_STATE = (

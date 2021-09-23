@@ -151,6 +151,8 @@ class ProfileViewSet(viewsets.ModelViewSet):
             profile.birth_date = request.data['birth_date']
         if 'address' in request.data:
             profile.address = request.data['address']
+        if 'role' in request.data:
+            profile.role = request.data['role']
         if 'favorite' in request.data:
             item = Item.objects.get(id=int(request.data['item']))
             if item in profile.favorite.all():

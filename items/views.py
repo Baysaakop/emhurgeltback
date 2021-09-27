@@ -49,10 +49,49 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = Category.objects.all().order_by('id')
-        type = self.request.query_params.get('type', None)       
+        type = self.request.query_params.get('type', None)     
+        types = self.request.query_params.get('types', None)       
         if type is not None:
-            queryset = queryset.filter(type=Type.objects.get(id=int(type))).distinct()       
+            queryset = queryset.filter(type=Type.objects.get(id=int(type))).distinct()     
+        if types is not None:
+            arr = []
+            for t in types.split(","):
+                arr.append(int(t))
+            queryset = queryset.filter(type__in=arr).distinct()  
         return queryset
+
+    def create(self, request, *args, **kwargs):
+        user = Token.objects.get(key=request.data['token']).user
+        type = Type.objects.get(id=int(request.data['type']))
+        category = Category.objects.create(
+            type=type,
+            name=request.data['name']                       
+        )
+        if 'name_en' in request.data:
+            category.name_en = request.data['name_en']     
+        if 'description' in request.data:
+            category.description = request.data['description']    
+        category.save()
+        serializer = CategorySerializer(category)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def update(self, request, *args, **kwargs):
+        category = self.get_object()
+        user = Token.objects.get(key=request.data['token']).user        
+        if 'type' in request.data:
+            type = Type.objects.get(id=int(request.data['type']))
+            category.type = type   
+        if 'name' in request.data:
+            category.name = request.data['name']
+        if 'name_en' in request.data:
+            category.name_en = request.data['name_en']   
+        if 'description' in request.data:
+            category.description = request.data['description']                     
+        category.save()
+        serializer = CategorySerializer(category)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK, headers=headers)
 
 
 class SubCategoryViewSet(viewsets.ModelViewSet):
@@ -61,12 +100,49 @@ class SubCategoryViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = SubCategory.objects.all().order_by('id')
-        category = self.request.query_params.get('category', None)       
+        category = self.request.query_params.get('category', None) 
+        categories = self.request.query_params.get('categories', None)       
         if category is not None:
-            queryset = queryset.filter(category=Category.objects.get(id=int(category))).distinct()       
+            queryset = queryset.filter(category=Category.objects.get(id=int(category))).distinct()  
+        if categories is not None:
+            arr = []
+            for c in categories.split(","):
+                arr.append(int(c))
+            queryset = queryset.filter(category__in=arr).distinct()       
         return queryset
 
+    def create(self, request, *args, **kwargs):
+        user = Token.objects.get(key=request.data['token']).user
+        category = Category.objects.get(id=int(request.data['category']))
+        subcategory = SubCategory.objects.create(
+            category=category,
+            name=request.data['name']                       
+        )
+        if 'name_en' in request.data:
+            subcategory.name_en = request.data['name_en'] 
+        if 'description' in request.data:
+            subcategory.description = request.data['description']        
+        subcategory.save()
+        serializer = SubCategorySerializer(subcategory)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
+    def update(self, request, *args, **kwargs):
+        subcategory = self.get_object()
+        user = Token.objects.get(key=request.data['token']).user        
+        if 'category' in request.data:
+            category = Category.objects.get(id=int(request.data['category']))
+            subcategory.category = category   
+        if 'name' in request.data:
+            subcategory.name = request.data['name']
+        if 'name_en' in request.data:
+            subcategory.name_en = request.data['name_en']    
+        if 'description' in request.data:
+            subcategory.description = request.data['description']                  
+        subcategory.save()
+        serializer = SubCategorySerializer(subcategory)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK, headers=headers)
 
 class TagViewSet(viewsets.ModelViewSet):
     serializer_class = TagSerializer
@@ -155,25 +231,25 @@ class ItemViewSet(viewsets.ModelViewSet):
         if 'company' in request.data:
             item.company = Company.objects.filter(
                 id=int(request.data['company']))[0]
-        if 'types' in request.data:
-            types = request.data['types'].split(',')
+        if 'type' in request.data:
+            types = request.data['type'].split(',')
             for t in types:
                 item.types.add(
                     Type.objects.filter(id=int(t))[0])
-        if 'categories' in request.data:
-            categories = request.data['categories'].split(',')
+        if 'category' in request.data:
+            categories = request.data['category'].split(',')
             for c in categories:
                 item.categories.add(
                     Category.objects.filter(id=int(c))[0])
-        if 'subcategories' in request.data:
-            subcategories = request.data['subcategories'].split(',')
+        if 'subcategory' in request.data:
+            subcategories = request.data['subcategory'].split(',')
             for s in subcategories:
                 item.subcategories.add(
                     SubCategory.objects.filter(id=int(s))[0])
-        # if 'tags' in request.data:
-        #     tags = request.data['tags'].split(',')
-        #     for tag in tags:
-        #         item.tags.add(Tag.objects.filter(id=int(tag))[0])
+        if 'tags' in request.data:
+            tags = request.data['tags'].split(',')
+            for tag in tags:
+                item.tags.add(Tag.objects.filter(id=int(tag))[0])
         if 'shop' in request.data:
             shops = request.data['shop'].split(',')
             for shop in shops:
@@ -233,26 +309,28 @@ class ItemViewSet(viewsets.ModelViewSet):
         if 'company' in request.data:
             item.company = Company.objects.filter(
                 id=int(request.data['company']))[0]
-        if 'types' in request.data:
-            types = request.data['types'].split(',')
+        if 'type' in request.data:
+            item.types.clear()
+            types = request.data['type'].split(',')
             for t in types:
                 item.types.add(
                     Type.objects.filter(id=int(t))[0])
-        if 'categories' in request.data:
-            categories = request.data['categories'].split(',')
+        if 'category' in request.data:
+            item.categories.clear()
+            categories = request.data['category'].split(',')
             for c in categories:
                 item.categories.add(
                     Category.objects.filter(id=int(c))[0])
-        if 'subcategories' in request.data:
-            subcategories = request.data['subcategories'].split(',')
+        if 'subcategory' in request.data:
+            item.subcategories.clear()
+            subcategories = request.data['subcategory'].split(',')
             for s in subcategories:
                 item.subcategories.add(
                     SubCategory.objects.filter(id=int(s))[0])
-        # if 'tag' in request.data:
-        #     tags = request.data['tag'].split(',')
-        #     item.tag.clear()
-        #     for tag in tags:
-        #         item.tag.add(Tag.objects.filter(id=int(tag))[0])
+        if 'tags' in request.data:
+            tags = request.data['tags'].split(',')
+            for tag in tags:
+                item.tags.add(Tag.objects.filter(id=int(tag))[0])
         if 'shop' in request.data:
             shops = request.data['shop'].split(',')
             for shop in shops:

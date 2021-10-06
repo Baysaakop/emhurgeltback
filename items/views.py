@@ -221,13 +221,13 @@ class ItemViewSet(viewsets.ModelViewSet):
             item.storage_en = request.data['storage_en']
         if 'price' in request.data:
             item.price = request.data['price']
-        if 'total' in request.data:
-            item.price = request.data['total']
-        if 'is_featured' in request.data:
-            if request.data['is_featured'] == 'true':
-                item.is_featured = True
+        if 'count' in request.data:
+            item.count = request.data['count']
+        if 'is_brand' in request.data:
+            if request.data['is_brand'] == 'true':
+                item.is_brand = True
             else:
-                item.is_featured = False
+                item.is_brand = False
         if 'company' in request.data:
             item.company = Company.objects.filter(
                 id=int(request.data['company']))[0]
@@ -299,13 +299,13 @@ class ItemViewSet(viewsets.ModelViewSet):
             item.storage_en = request.data['storage_en']
         if 'price' in request.data:
             item.price = request.data['price']
-        if 'total' in request.data:
-            item.total = request.data['total']
-        if 'is_featured' in request.data:
-            if request.data['is_featured'] == 'true':
-                item.is_featured = True
+        if 'count' in request.data:
+            item.count = request.data['count']
+        if 'is_brand' in request.data:
+            if request.data['is_brand'] == 'true':
+                item.is_brand = True
             else:
-                item.is_featured = False
+                item.is_brand = False
         if 'company' in request.data:
             item.company = Company.objects.filter(
                 id=int(request.data['company']))[0]

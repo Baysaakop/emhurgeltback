@@ -1,6 +1,6 @@
+from django.conf import settings
 from django.db import models
-from django.contrib.auth.models import User
-from djrichtextfield.models import RichTextField
+from django.conf import settings
 
 
 def company_directory_path(instance, filename):
@@ -31,7 +31,8 @@ class Company(models.Model):
 
 class Type(models.Model):
     name = models.CharField(max_length=100)
-    name_en = models.CharField(max_length=100, blank=True, null=True, db_column="name_en")
+    name_en = models.CharField(
+        max_length=100, blank=True, null=True, db_column="name_en")
     description = models.TextField(blank=True, null=True)
 
     def __str__(self):
@@ -42,7 +43,8 @@ class Category(models.Model):
     type = models.ForeignKey(
         Type, on_delete=models.SET_NULL, null=True, blank=True)
     name = models.CharField(max_length=100)
-    name_en = models.CharField(max_length=100, blank=True, null=True, db_column="name_en")
+    name_en = models.CharField(
+        max_length=100, blank=True, null=True, db_column="name_en")
     description = models.TextField(blank=True, null=True)
 
     def __str__(self):
@@ -53,7 +55,8 @@ class SubCategory(models.Model):
     category = models.ForeignKey(
         Category, on_delete=models.SET_NULL, null=True, blank=True)
     name = models.CharField(max_length=100)
-    name_en = models.CharField(max_length=100, blank=True, null=True, db_column="name_en")
+    name_en = models.CharField(
+        max_length=100, blank=True, null=True, db_column="name_en")
     description = models.TextField(blank=True, null=True)
 
     def __str__(self):
@@ -62,19 +65,9 @@ class SubCategory(models.Model):
 
 class Tag(models.Model):
     name = models.CharField(max_length=100)
-    name_en = models.CharField(max_length=100, blank=True, null=True, db_column="name_en")
+    name_en = models.CharField(
+        max_length=100, blank=True, null=True, db_column="name_en")
     description = models.TextField(blank=True, null=True)
-
-    def __str__(self):
-        return self.name
-
-
-class Shop(models.Model):
-    name = models.CharField(max_length=100)
-    phone_number = models.CharField(max_length=50)
-    address = models.TextField(blank=True)
-    image = models.ImageField(
-        upload_to=shop_directory_path, null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -82,30 +75,32 @@ class Shop(models.Model):
 
 class Item(models.Model):
     name = models.CharField(max_length=100)
-    name_en = models.CharField(max_length=100, blank=True, null=True, db_column="name_en")
+    name_en = models.CharField(
+        max_length=100, blank=True, null=True, db_column="name_en")
     description = models.TextField(blank=True, null=True)
-    description_en = models.TextField(blank=True, null=True, db_column="description_en")
+    description_en = models.TextField(
+        blank=True, null=True, db_column="description_en")
     ingredients = models.TextField(blank=True, null=True)
-    ingredients_en = models.TextField(blank=True, null=True, db_column="ingredients_en")
+    ingredients_en = models.TextField(
+        blank=True, null=True, db_column="ingredients_en")
     usage = models.TextField(blank=True, null=True)
     usage_en = models.TextField(blank=True, null=True, db_column="usage_en")
     caution = models.TextField(blank=True, null=True)
-    caution_en = models.TextField(blank=True, null=True, db_column="caution_en")
+    caution_en = models.TextField(
+        blank=True, null=True, db_column="caution_en")
     storage = models.TextField(blank=True, null=True)
-    storage_en = models.TextField(blank=True, null=True, db_column="storage_en")
+    storage_en = models.TextField(
+        blank=True, null=True, db_column="storage_en")
     company = models.ForeignKey(
         Company, on_delete=models.CASCADE, null=True, blank=True)
-    # category = models.ManyToManyField(Category, null=True, blank=True)
     types = models.ManyToManyField(Type, null=True, blank=True)
     categories = models.ManyToManyField(Category, null=True, blank=True)
     subcategories = models.ManyToManyField(SubCategory, null=True, blank=True)
     tags = models.ManyToManyField(Tag, null=True, blank=True)
     price = models.IntegerField(default=0)
-    shops = models.ManyToManyField(Shop, null=True, blank=True)
-    rating = models.IntegerField(default=0)
     count = models.IntegerField(default=0)
     is_featured = models.BooleanField(default=False)
-    video = models.CharField(max_length=200, blank=True)
+    video = models.CharField(max_length=200, null=True, blank=True)
     image1 = models.ImageField(
         upload_to=item_directory_path, null=True, blank=True)
     image2 = models.ImageField(
@@ -118,24 +113,6 @@ class Item(models.Model):
         upload_to=poster_directory_path, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    created_by = models.ForeignKey(
-        User, on_delete=models.SET_NULL, blank=True, null=True, related_name="item_created_by")
-    updated_by = models.ForeignKey(
-        User, on_delete=models.SET_NULL, blank=True, null=True, related_name="item_updated_by")
 
     def __str__(self):
         return self.name
-
-
-class Post(models.Model):
-    title = models.CharField(max_length=100)
-    content = RichTextField()
-    thumbnail = models.ImageField(
-        upload_to='posts/%Y/%m/%d', null=True, blank=True)
-    video = models.CharField(max_length=200, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    created_by = models.ForeignKey(
-        User, on_delete=models.SET_NULL, blank=True, null=True, related_name="post_created_by")
-
-    def __str__(self):
-        return self.title

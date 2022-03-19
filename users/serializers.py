@@ -1,40 +1,12 @@
+from statistics import mode
 from rest_framework import serializers
-from django.contrib.auth.models import User
-from django.contrib.auth.forms import PasswordResetForm
-from django.conf import settings
+from django.db import transaction
 from django.utils.translation import gettext as _
-from .models import Profile, CartItem, Order, City, District, Section, Building
+from dj_rest_auth.registration.serializers import RegisterSerializer
+from dj_rest_auth.models import TokenModel
+
 from items.serializers import ItemSerializer
-
-
-class CitySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = City
-        fields = ('id', 'name')
-
-
-class DistrictSerializer(serializers.ModelSerializer):
-    city = CitySerializer(read_only=True)
-
-    class Meta:
-        model = District
-        fields = ('id', 'city', 'name')
-
-
-class SectionSerializer(serializers.ModelSerializer):
-    district = DistrictSerializer(read_only=True)
-
-    class Meta:
-        model = Section
-        fields = ('id', 'district', 'name')
-
-
-class BuildingSerializer(serializers.ModelSerializer):
-    section = SectionSerializer(read_only=True)
-
-    class Meta:
-        model = Building
-        fields = ('id', 'section', 'name')
+from .models import CustomUser, CartItem, USER_ROLES
 
 
 class CartItemSerializer(serializers.ModelSerializer):
@@ -45,33 +17,60 @@ class CartItemSerializer(serializers.ModelSerializer):
         fields = ('id', 'item', 'count')
 
 
-class ProfileSerializer(serializers.ModelSerializer):
+class CustomUserSerializer(serializers.ModelSerializer):
+
     favorite = ItemSerializer(read_only=True, many=True)
     cart = CartItemSerializer(read_only=True, many=True)
 
     class Meta:
-        model = Profile
-        fields = (
-            'id', 'user', 'description', 'phone_number', 'address', 'favorite', 'cart', 'level', 'percent', 'bonus', 'total', 'birth_date', 'avatar', 'role', 'created_at', 'updated_at'
-        )
+        model = CustomUser
+        fields = ['id', 'username', 'email', 'company_name',
+                  'company_id', 'address', 'role', 'is_confirmed',
+                  'favorite', 'cart', 'level', 'percent', 'bonus', 'total']
 
 
-class UserSerializer(serializers.ModelSerializer):
-    profile = ProfileSerializer(required=False)
+class CustomTokenSerializer(serializers.ModelSerializer):
 
-    class Meta:
-        model = User
-        fields = (
-            'id', 'username', 'email', 'first_name', 'last_name', 'profile'
-        )
-
-
-class OrderSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True)
-    items = CartItemSerializer(read_only=True, many=True)
+    user = CustomUserSerializer(read_only=True)
 
     class Meta:
-        model = Order
-        fields = (
-            'id', 'ref', 'user', 'items', 'total', 'bonus', 'phone_number', 'address', 'info', 'state', 'created_at', 'on_delivery_at', 'successful_at'
-        )
+        model = TokenModel
+        fields = ('key', 'user')
+
+
+class CustomRegisterSerializer(RegisterSerializer):
+    company_name = serializers.CharField(max_length=80, required=False)
+    company_id = serializers.CharField(max_length=30, required=False)
+    address = serializers.CharField(max_length=200, required=False)
+    role = serializers.ChoiceField(choices=USER_ROLES)
+
+    # Define transaction.atomic to rollback the save operation in case of error
+    @transaction.atomic
+    def save(self, request):
+        if (self.data.get('role') == "1"):
+            return None
+
+        else:
+            user = super().save(request)
+            user.role = self.data.get('role')
+            if (self.data.get('role') == "2"):
+                user.is_confirmed = True
+            if (self.data.get('company_name') != ""):
+                user.company_name = self.data.get('company_name')
+            if (self.data.get('company_id') != ""):
+                user.company_id = self.data.get('company_id')
+            if (self.data.get('address') != ""):
+                user.address = self.data.get('address')
+            user.save()
+            return user
+
+
+# class OrderSerializer(serializers.ModelSerializer):
+#     user = UserSerializer(read_only=True)
+#     items = CartItemSerializer(read_only=True, many=True)
+
+#     class Meta:
+#         model = Order
+#         fields = (
+#             'id', 'ref', 'user', 'items', 'total', 'bonus', 'phone_number', 'address', 'info', 'state', 'created_at', 'on_delivery_at', 'successful_at'
+#         )

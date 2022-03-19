@@ -1,4 +1,4 @@
-from .views import CompanyViewSet, TypeViewSet, CategoryViewSet, SubCategoryViewSet, TagViewSet, ShopViewSet, ItemViewSet, PostViewSet
+from .views import CompanyViewSet, TypeViewSet, CategoryViewSet, SubCategoryViewSet, TagViewSet, ItemViewSet
 from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
@@ -7,7 +7,5 @@ router.register(r'types', TypeViewSet, basename='types')
 router.register(r'categories', CategoryViewSet, basename='categories')
 router.register(r'subcategories', SubCategoryViewSet, basename='subcategories')
 router.register(r'tags', TagViewSet, basename='tags')
-router.register(r'shops', ShopViewSet, basename='shops')
 router.register(r'items', ItemViewSet, basename='items')
-router.register(r'posts', PostViewSet, basename='posts')
 urlpatterns = router.urls

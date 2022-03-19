@@ -1,6 +1,5 @@
 import os
 import dotenv
-import dj_database_url
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -46,7 +45,7 @@ INSTALLED_APPS = [
     'djrichtextfield',
     'storages',
     'items',
-    'users',    
+    'users',
     # 'addresses'
 ]
 
@@ -167,17 +166,24 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 24
 }
 
+AUTH_USER_MODEL = 'users.CustomUser'
+
 REST_AUTH_SERIALIZERS = {
-    'USER_DETAILS_SERIALIZER': 'users.serializers.UserSerializer',
+    'USER_DETAILS_SERIALIZER': 'users.serializers.CustomUserSerializer',
+    'TOKEN_SERIALIZER': 'users.serializers.CustomTokenSerializer',
+}
+
+REST_AUTH_REGISTER_SERIALIZERS = {
+    'REGISTER_SERIALIZER': 'users.serializers.CustomRegisterSerializer'
 }
 
 CORS_ORIGIN_ALLOW_ALL = True
 
 AUTHENTICATION_BACKENDS = [
-    # Needed to login by username in Django admin, regardless of `allauth`
-    'django.contrib.auth.backends.ModelBackend',
     # `allauth` specific authentication methods, such as login by e-mail
     'allauth.account.auth_backends.AuthenticationBackend',
+    # Needed to login by username in Django admin, regardless of `allauth`
+    'django.contrib.auth.backends.ModelBackend',
 ]
 
 STATIC_URL = '/static/'
@@ -195,14 +201,3 @@ DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 AWS_ACCESS_KEY_ID = 'AKIA3IGK2KCXI7HSUIVM'
 AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
 AWS_STORAGE_BUCKET_NAME = 'epharmacy-bucket'
-
-DJRICHTEXTFIELD_CONFIG = {
-    'js': ['//cdn.tiny.cloud/1/wpwv44irouwa2fnzez4rgccg20gz5bri6qmwlt4wbeuha01r/tinymce/5/tinymce.min.js'],
-    'init_template': 'djrichtextfield/init/tinymce.js',
-    'settings': {
-        'menubar': False,
-        'plugins': 'link image',
-        'toolbar': 'bold italic | link image | removeformat',
-        'width': 700
-    }
-}

@@ -6,7 +6,7 @@ from dj_rest_auth.registration.serializers import RegisterSerializer
 from dj_rest_auth.models import TokenModel
 
 from items.serializers import ItemSerializer
-from .models import CustomUser, CartItem, USER_ROLES
+from .models import USER_ROLES, CustomUser, CartItem, Order
 
 
 class CartItemSerializer(serializers.ModelSerializer):
@@ -26,7 +26,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
         model = CustomUser
         fields = ['id', 'username', 'email', 'company_name',
                   'company_id', 'address', 'role', 'is_confirmed',
-                  'favorite', 'cart', 'level', 'percent', 'bonus', 'total']
+                  'favorite', 'cart', 'level', 'bonus', 'total']
 
 
 class CustomTokenSerializer(serializers.ModelSerializer):
@@ -65,12 +65,12 @@ class CustomRegisterSerializer(RegisterSerializer):
             return user
 
 
-# class OrderSerializer(serializers.ModelSerializer):
-#     user = UserSerializer(read_only=True)
-#     items = CartItemSerializer(read_only=True, many=True)
+class OrderSerializer(serializers.ModelSerializer):
+    customer = CustomUserSerializer(read_only=True)
+    items = CartItemSerializer(read_only=True, many=True)
 
-#     class Meta:
-#         model = Order
-#         fields = (
-#             'id', 'ref', 'user', 'items', 'total', 'bonus', 'phone_number', 'address', 'info', 'state', 'created_at', 'on_delivery_at', 'successful_at'
-#         )
+    class Meta:
+        model = Order
+        fields = (
+            'id', 'ref', 'customer', 'items', 'total', 'bonus', 'phone_number', 'address', 'is_delivered', 'is_payed', 'created_at'
+        )

@@ -1,8 +1,9 @@
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, pagination
 from rest_framework.response import Response
+from rest_framework.authtoken.models import Token
 
-from .serializers import CartItemSerializer, CustomUserSerializer
-from .models import CartItem, CustomUser
+from .serializers import CartItemSerializer, CustomUserSerializer, OrderSerializer
+from .models import CartItem, CustomUser, Order
 
 from items.models import Item
 
@@ -61,118 +62,100 @@ class CustomUserViewSet(viewsets.ModelViewSet):
                     count=count
                 )
                 customuser.cart.add(cartitem)
+            elif mode == "update":
+                cartitem = customuser.cart.all().filter(item=item).first()
+                cartitem.count = count
+                cartitem.save()
             elif mode == "delete":
                 customuser.cart.all().filter(item=item).first().delete()
-            elif mode == "add":
-                cartitem = customuser.cart.all().filter(item=item).first()
-                cartitem.count = cartitem.count + 1
-                cartitem.save()
-            elif mode == "sub":
-                cartitem = customuser.cart.all().filter(item=item).first()
-                cartitem.count = cartitem.count - 1
-                cartitem.save()
         customuser.save()
         serializer = CustomUserSerializer(customuser)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_200_OK, headers=headers)
 
 
-# def getBonus(items, percent):
-#     bonus = 0
-#     for order_item in items:
-#         item = order_item.item
-#         count = order_item.count
-#         if (item.is_featured == True):
-#             bonus = bonus + (item.price / 100) * percent * 1.5 * count
-#         else:
-#             bonus = bonus + (item.price / 100) * percent * count
-#         item.total = item.total - count
-#         item.save()
-
-#     return bonus
+def getLevel(total):
+    if total >= 88000000:
+        return 3
+    elif total >= 33000000:
+        return 2
+    else:
+        return 1
 
 
-# def updatePercent(user):
-#     if user.profile.total > 5000:
-#         user.profile.percent = 3
-#         user.profile.level = 1
-#     elif user.profile.total > 20000:
-#         user.profile.percent = 4
-#         user.profile.level = 2
-#     elif user.profile.total > 50000:
-#         user.profile.percent = 5
-#         user.profile.level = 3
-#     elif user.profile.total > 100000:
-#         user.profile.percent = 6
-#         user.profile.level = 4
-#     user.save()
+class OrderPagination(pagination.PageNumberPagination):
+    page_size = 24
 
 
-# class OrderViewSet(viewsets.ModelViewSet):
-#     serializer_class = OrderSerializer
-#     queryset = Order.objects.order_by('-created_at')
+class OrderViewSet(viewsets.ModelViewSet):
+    serializer_class = OrderSerializer
+    queryset = Order.objects.order_by('-created_at')
+    pagination_class = OrderPagination
 
-#     def get_queryset(self):
-#         queryset = Order.objects.all().order_by('-created_at')
-#         user = self.request.query_params.get('user', None)
-#         state = self.request.query_params.get('state', None)
-#         if user is not None:
-#             queryset = queryset.filter(
-#                 user__id=user).distinct().order_by('state', '-created_at')
-#         if state is not None:
-#             queryset = queryset.filter(
-#                 state=state).distinct().order_by('created_at')
-#         return queryset
+    def get_queryset(self):
+        queryset = Order.objects.all().order_by('-created_at')
+        customer = self.request.query_params.get('customer', None)
+        is_payed = self.request.query_params.get('is_payed', None)
+        if customer is not None:
+            queryset = queryset.filter(
+                customer__id=customer).distinct().order_by('-created_at')
+        if is_payed is not None:
+            if is_payed == "True":
+                queryset = queryset.filter(
+                    is_payed=True).distinct().order_by('-created_at')
+            else:
+                queryset = queryset.filter(
+                    is_payed=False).distinct().order_by('-created_at')
+        return queryset
 
-#     def create(self, request, *args, **kwargs):
-#         user = Token.objects.get(key=request.data['token']).user
-#         total = int(request.data['total'])
-#         bonus = int(request.data['bonus'])
-#         if (user.profile.bonus >= bonus):
-#             order = Order.objects.create(
-#                 user=user,
-#                 total=total,
-#                 bonus=bonus,
-#                 phone_number=request.data['phone_number'],
-#                 address=request.data['address'],
-#                 info=request.data['info'],
-#             )
-#             for item in user.profile.cart.all():
-#                 order.items.add(item)
-#             order.save()
-#             user.profile.cart.clear()
-#             user.profile.bonus = user.profile.bonus - bonus
-#             user.save()
-#             serializer = OrderSerializer(order)
-#             headers = self.get_success_headers(serializer.data)
-#             return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-#         else:
-#             return Response(data=None, status=status.HTTP_406_NOT_ACCEPTABLE)
+    def create(self, request, *args, **kwargs):
+        customer = Token.objects.get(key=request.data['token']).user
+        total = int(request.data['total'])
+        bonus = int(request.data['bonus'])
+        if (customer.bonus >= bonus):
+            order = Order.objects.create(
+                customer=customer,
+                total=total,
+                bonus=bonus,
+                phone_number=request.data['phone_number'],
+                address=request.data['address']
+            )
+            for cartitem in customer.cart.all():
+                order.items.add(cartitem)
+                cartitem.item.count -= cartitem.count
+                cartitem.item.save()
+            order.save()
+            customer.cart.clear()
+            customer.bonus -= bonus
+            customer.save()
+            serializer = OrderSerializer(order)
+            headers = self.get_success_headers(serializer.data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        else:
+            return Response(data=None, status=status.HTTP_406_NOT_ACCEPTABLE)
 
-#     def update(self, request, *args, **kwargs):
-#         order = self.get_object()
-#         state = request.data['state']
-#         if state == "1":
-#             # Payed
-#             order.state = "2"
-#         elif state == "2":
-#             # On Delivery
-#             order.state = "3"
-#             ##order.on_delivery_at = datetime.datetime.now()
-#         elif state == "3":
-#             # Delivered
-#             order.state = "4"
-#             bonus = getBonus(order.items.all(), order.user.profile.percent)
-#             order.user.profile.bonus = order.user.profile.bonus + bonus
-#             order.user.profile.total = order.user.profile.total + bonus
-#             order.user.save()
-#             updatePercent(order.user)
-#         elif state == "5":
-#             # Declined
-#             order.state = "5"
-#             order.user.profile.bonus = order.user.profile.bonus + order.bonus
-#             order.user.save()
-#         order.save()
-#         serializer = OrderSerializer(order)
-#         headers = self.get_success_headers(serializer.data)
-#         return Response(serializer.data, status=status.HTTP_200_OK, headers=headers)
+    def update(self, request, *args, **kwargs):
+        order = self.get_object()
+        if 'is_payed' in request.data and request.data['is_payed'] == True:
+            order.is_payed = True
+            bonus = 0
+            for cartitem in order.items.all():
+                bonus += (cartitem.item.price / 100) * cartitem.item.multiplier * \
+                    order.customer.level * cartitem.count
+            order.customer.bonus += bonus
+            order.customer.total += order.total
+            order.customer.level = getLevel(order.customer.total)
+            order.customer.save()
+        order.save()
+        serializer = OrderSerializer(order)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK, headers=headers)
+
+    def destroy(self, request, *args, **kwargs):
+        order = self.get_object()
+        for cartitem in order.items.all():
+            cartitem.item.count += cartitem.count
+            cartitem.item.save()
+        order.customer.bonus += order.bonus
+        order.customer.save()
+        return super().destroy(request, *args, **kwargs)

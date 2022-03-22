@@ -1,8 +1,8 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
-from .models import Company, Type, Category, SubCategory, Tag, Item
-from .serializers import CompanySerializer, TypeSerializer, CategorySerializer, SubCategorySerializer, TagSerializer, ItemSerializer
+from .models import Company, Type, Category, SubCategory, Tag, Item, Slider
+from .serializers import CompanySerializer, TypeSerializer, CategorySerializer, SubCategorySerializer, TagSerializer, ItemSerializer, SliderSerializer
 
 
 class CompanyViewSet(viewsets.ModelViewSet):
@@ -214,6 +214,8 @@ class ItemViewSet(viewsets.ModelViewSet):
             item.price = int(request.data['price'])
         if 'count' in request.data:
             item.count = int(request.data['count'])
+        if 'multiplier' in request.data:
+            item.multiplier = int(request.data['multiplier'])
         if 'is_featured' in request.data:
             if request.data['is_featured'] == 'true':
                 item.is_featured = True
@@ -288,6 +290,8 @@ class ItemViewSet(viewsets.ModelViewSet):
             item.price = int(request.data['price'])
         if 'count' in request.data:
             item.count = int(request.data['count'])
+        if 'multiplier' in request.data:
+            item.multiplier = int(request.data['multiplier'])
         if 'is_featured' in request.data:
             if request.data['is_featured'] == 'true':
                 item.is_featured = True
@@ -332,5 +336,28 @@ class ItemViewSet(viewsets.ModelViewSet):
             item.video = request.data['video']
         item.save()
         serializer = ItemSerializer(item)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK, headers=headers)
+
+
+class SliderViewSet(viewsets.ModelViewSet):
+    serializer_class = SliderSerializer
+    queryset = Slider.objects.all().order_by('-id')[:5]
+
+    def create(self, request, *args, **kwargs):
+        slider = Slider.objects.create(
+            image=request.data['image']
+        )
+        slider.save()
+        serializer = SliderSerializer(slider)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def update(self, request, *args, **kwargs):
+        slider = self.get_object()
+        if 'image' in request.data:
+            slider.image = request.data['image']
+        slider.save()
+        serializer = SliderSerializer(slider)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_200_OK, headers=headers)

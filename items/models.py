@@ -1,3 +1,4 @@
+from statistics import mode
 from django.conf import settings
 from django.db import models
 from django.conf import settings
@@ -15,8 +16,8 @@ def poster_directory_path(instance, filename):
     return 'posters/{0}/{1}'.format(instance.id, filename)
 
 
-def shop_directory_path(instance, filename):
-    return 'shops/{0}/{1}'.format(instance.id, filename)
+def slider_directory_path(instance, filename):
+    return 'sliders/{0}/{1}'.format(instance.id, filename)
 
 
 class Company(models.Model):
@@ -99,8 +100,6 @@ class Item(models.Model):
     tags = models.ManyToManyField(Tag, null=True, blank=True)
     price = models.IntegerField(default=0)
     count = models.IntegerField(default=0)
-    is_featured = models.BooleanField(default=False)
-    video = models.CharField(max_length=200, null=True, blank=True)
     image1 = models.ImageField(
         upload_to=item_directory_path, null=True, blank=True)
     image2 = models.ImageField(
@@ -109,6 +108,10 @@ class Item(models.Model):
         upload_to=item_directory_path, null=True, blank=True)
     image4 = models.ImageField(
         upload_to=item_directory_path, null=True, blank=True)
+    # Featured only
+    is_featured = models.BooleanField(default=False)
+    multiplier = models.IntegerField(default=1)
+    video = models.CharField(max_length=200, null=True, blank=True)
     poster = models.ImageField(
         upload_to=poster_directory_path, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -116,3 +119,8 @@ class Item(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Slider(models.Model):
+    image = models.ImageField(
+        upload_to=slider_directory_path, null=True, blank=True)

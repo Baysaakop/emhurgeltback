@@ -1,8 +1,10 @@
+import string
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
-from .models import Company, Type, Category, SubCategory, Tag, Item, Slider
-from .serializers import CompanySerializer, TypeSerializer, CategorySerializer, SubCategorySerializer, TagSerializer, ItemSerializer, SliderSerializer
+from django.db.models import Q
+from .models import Company, Type, Category, SubCategory, Tag, Item, Slider, Video
+from .serializers import CompanySerializer, TypeSerializer, CategorySerializer, SubCategorySerializer, TagSerializer, ItemSerializer, SliderSerializer, VideoSerializer
 
 
 class CompanyViewSet(viewsets.ModelViewSet):
@@ -157,13 +159,14 @@ class ItemViewSet(viewsets.ModelViewSet):
         type = self.request.query_params.get('type', None)
         category = self.request.query_params.get('category', None)
         subcategory = self.request.query_params.get('subcategory', None)
+        company = self.request.query_params.get('company', None)
         tags = self.request.query_params.get('tags', None)
         pricelow = self.request.query_params.get('pricelow', None)
         pricehigh = self.request.query_params.get('pricehigh', None)
         order = self.request.query_params.get('order', None)
         if name is not None:
-            queryset = queryset.filter(name__icontains=name).distinct()
-            # queryset = queryset.filter(Q(name__icontains=name) | Q(tag__name=name)).distinct()
+            queryset = queryset.filter(Q(name__icontains=name) | Q(
+                name__icontains=string.capwords(name))).distinct()
         if is_featured is not None:
             queryset = queryset.filter(is_featured=True).distinct()
         if type is not None:
@@ -173,6 +176,8 @@ class ItemViewSet(viewsets.ModelViewSet):
         if subcategory is not None:
             queryset = queryset.filter(
                 subcategories__id=subcategory).distinct()
+        if company is not None:
+            queryset = queryset.filter(company__id=company).distinct()
         # if tags is not None:
         #     for tag in tags.split(","):
         #         queryset = queryset.filter(tag__id=tag).distinct()
@@ -342,7 +347,7 @@ class ItemViewSet(viewsets.ModelViewSet):
 
 class SliderViewSet(viewsets.ModelViewSet):
     serializer_class = SliderSerializer
-    queryset = Slider.objects.all().order_by('-id')[:5]
+    queryset = Slider.objects.all().order_by('-id')[:8]
 
     def create(self, request, *args, **kwargs):
         slider = Slider.objects.create(
@@ -361,3 +366,8 @@ class SliderViewSet(viewsets.ModelViewSet):
         serializer = SliderSerializer(slider)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_200_OK, headers=headers)
+
+
+class VideoViewSet(viewsets.ModelViewSet):
+    serializer_class = VideoSerializer
+    queryset = Video.objects.all().order_by('-id')

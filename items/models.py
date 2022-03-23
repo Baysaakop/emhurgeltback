@@ -124,3 +124,11 @@ class Item(models.Model):
 class Slider(models.Model):
     image = models.ImageField(
         upload_to=slider_directory_path, null=True, blank=True)
+
+
+class Video(models.Model):
+    name = models.CharField(max_length=100)
+    video_url = models.CharField(max_length=200)
+
+    def __str__(self):
+        return self.name

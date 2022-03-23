@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Company, Type, Category, SubCategory, Tag, Item, Slider
+from .models import Company, Type, Category, SubCategory, Tag, Item, Slider, Video
 
 
 class CompanySerializer(serializers.ModelSerializer):
@@ -49,3 +49,9 @@ class SliderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Slider
         fields = ('id', 'image')
+
+
+class VideoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Video
+        fields = ('id', 'name', 'video_url')

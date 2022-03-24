@@ -111,12 +111,12 @@ class OrderViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         customer = Token.objects.get(key=request.data['token']).user
         total = int(request.data['total'])
-        bonus = int(request.data['bonus'])
-        if (customer.bonus >= bonus):
+        bonus_used = int(request.data['bonus_used'])
+        if (customer.bonus >= bonus_used):
             order = Order.objects.create(
                 customer=customer,
                 total=total,
-                bonus=bonus,
+                bonus_used=bonus_used,
                 phone_number=request.data['phone_number'],
                 address=request.data['address']
             )
@@ -126,7 +126,7 @@ class OrderViewSet(viewsets.ModelViewSet):
                 cartitem.item.save()
             order.save()
             customer.cart.clear()
-            customer.bonus -= bonus
+            customer.bonus -= bonus_used
             customer.save()
             serializer = OrderSerializer(order)
             headers = self.get_success_headers(serializer.data)
@@ -142,9 +142,14 @@ class OrderViewSet(viewsets.ModelViewSet):
             for cartitem in order.items.all():
                 bonus += (cartitem.item.price / 100) * cartitem.item.multiplier * \
                     order.customer.level * cartitem.count
+            order.bonus_granted = bonus
             order.customer.bonus += bonus
-            order.customer.total += order.total
-            order.customer.level = getLevel(order.customer.total)
+            order.customer.total += order.total - order.bonus_used
+            level = getLevel(order.customer.total)
+            if order.customer.level != level:
+                order.customer.level = level
+                if level == 2:
+                    order.customer.bonus += 300000
             order.customer.save()
         order.save()
         serializer = OrderSerializer(order)

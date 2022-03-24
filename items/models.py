@@ -30,35 +30,20 @@ class Company(models.Model):
         return self.name
 
 
-class Type(models.Model):
+class SubCategory(models.Model):
     name = models.CharField(max_length=100)
     name_en = models.CharField(
         max_length=100, blank=True, null=True, db_column="name_en")
-    description = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return self.name
 
 
 class Category(models.Model):
-    type = models.ForeignKey(
-        Type, on_delete=models.SET_NULL, null=True, blank=True)
     name = models.CharField(max_length=100)
     name_en = models.CharField(
         max_length=100, blank=True, null=True, db_column="name_en")
-    description = models.TextField(blank=True, null=True)
-
-    def __str__(self):
-        return self.name
-
-
-class SubCategory(models.Model):
-    category = models.ForeignKey(
-        Category, on_delete=models.SET_NULL, null=True, blank=True)
-    name = models.CharField(max_length=100)
-    name_en = models.CharField(
-        max_length=100, blank=True, null=True, db_column="name_en")
-    description = models.TextField(blank=True, null=True)
+    subcategories = models.ManyToManyField(SubCategory)
 
     def __str__(self):
         return self.name
@@ -68,7 +53,6 @@ class Tag(models.Model):
     name = models.CharField(max_length=100)
     name_en = models.CharField(
         max_length=100, blank=True, null=True, db_column="name_en")
-    description = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return self.name
@@ -94,7 +78,6 @@ class Item(models.Model):
         blank=True, null=True, db_column="storage_en")
     company = models.ForeignKey(
         Company, on_delete=models.CASCADE, null=True, blank=True)
-    types = models.ManyToManyField(Type, null=True, blank=True)
     categories = models.ManyToManyField(Category, null=True, blank=True)
     subcategories = models.ManyToManyField(SubCategory, null=True, blank=True)
     tags = models.ManyToManyField(Tag, null=True, blank=True)
@@ -111,7 +94,6 @@ class Item(models.Model):
     # Featured only
     is_featured = models.BooleanField(default=False)
     multiplier = models.IntegerField(default=1)
-    video = models.CharField(max_length=200, null=True, blank=True)
     poster = models.ImageField(
         upload_to=poster_directory_path, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)

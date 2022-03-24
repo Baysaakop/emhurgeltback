@@ -3,8 +3,8 @@ from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from django.db.models import Q
-from .models import Company, Type, Category, SubCategory, Tag, Item, Slider, Video
-from .serializers import CompanySerializer, TypeSerializer, CategorySerializer, SubCategorySerializer, TagSerializer, ItemSerializer, SliderSerializer, VideoSerializer
+from .models import Company, Category, SubCategory, Tag, Item, Slider, Video
+from .serializers import CompanySerializer, CategorySerializer, SubCategorySerializer, TagSerializer, ItemSerializer, SliderSerializer, VideoSerializer
 
 
 class CompanyViewSet(viewsets.ModelViewSet):
@@ -38,105 +38,49 @@ class CompanyViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK, headers=headers)
 
 
-class TypeViewSet(viewsets.ModelViewSet):
-    serializer_class = TypeSerializer
-    queryset = Type.objects.all().order_by('id')
-
-
 class CategoryViewSet(viewsets.ModelViewSet):
     serializer_class = CategorySerializer
     queryset = Category.objects.all().order_by('id')
-
-    def get_queryset(self):
-        queryset = Category.objects.all().order_by('id')
-        type = self.request.query_params.get('type', None)
-        types = self.request.query_params.get('types', None)
-        if type is not None:
-            queryset = queryset.filter(
-                type=Type.objects.get(id=int(type))).distinct()
-        if types is not None:
-            arr = []
-            for t in types.split(","):
-                arr.append(int(t))
-            queryset = queryset.filter(type__in=arr).distinct()
-        return queryset
-
-    def create(self, request, *args, **kwargs):
-        type = Type.objects.get(id=int(request.data['type']))
-        category = Category.objects.create(
-            type=type,
-            name=request.data['name']
-        )
-        if 'name_en' in request.data:
-            category.name_en = request.data['name_en']
-        if 'description' in request.data:
-            category.description = request.data['description']
-        category.save()
-        serializer = CategorySerializer(category)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-
-    def update(self, request, *args, **kwargs):
-        category = self.get_object()
-        if 'type' in request.data:
-            type = Type.objects.get(id=int(request.data['type']))
-            category.type = type
-        if 'name' in request.data:
-            category.name = request.data['name']
-        if 'name_en' in request.data:
-            category.name_en = request.data['name_en']
-        if 'description' in request.data:
-            category.description = request.data['description']
-        category.save()
-        serializer = CategorySerializer(category)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_200_OK, headers=headers)
 
 
 class SubCategoryViewSet(viewsets.ModelViewSet):
     serializer_class = SubCategorySerializer
     queryset = SubCategory.objects.all().order_by('id')
 
-    def get_queryset(self):
-        queryset = SubCategory.objects.all().order_by('id')
-        category = self.request.query_params.get('category', None)
-        categories = self.request.query_params.get('categories', None)
-        if category is not None:
-            queryset = queryset.filter(
-                category=Category.objects.get(id=int(category))).distinct()
-        if categories is not None:
-            arr = []
-            for c in categories.split(","):
-                arr.append(int(c))
-            queryset = queryset.filter(category__in=arr).distinct()
-        return queryset
+    # def get_queryset(self):
+    #     queryset = SubCategory.objects.all().order_by('id')
+    #     category = self.request.query_params.get('category', None)
+    #     categories = self.request.query_params.get('categories', None)
+    #     if category is not None:
+    #         queryset = queryset.filter(
+    #             category=Category.objects.get(id=int(category))).distinct()
+    #     if categories is not None:
+    #         arr = []
+    #         for c in categories.split(","):
+    #             arr.append(int(c))
+    #         queryset = queryset.filter(category__in=arr).distinct()
+    #     return queryset
 
     def create(self, request, *args, **kwargs):
         category = Category.objects.get(id=int(request.data['category']))
         subcategory = SubCategory.objects.create(
-            category=category,
             name=request.data['name']
         )
         if 'name_en' in request.data:
             subcategory.name_en = request.data['name_en']
-        if 'description' in request.data:
-            subcategory.description = request.data['description']
         subcategory.save()
+        category.subcategories.add(subcategory)
+        category.save()
         serializer = SubCategorySerializer(subcategory)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     def update(self, request, *args, **kwargs):
         subcategory = self.get_object()
-        if 'category' in request.data:
-            category = Category.objects.get(id=int(request.data['category']))
-            subcategory.category = category
         if 'name' in request.data:
             subcategory.name = request.data['name']
         if 'name_en' in request.data:
             subcategory.name_en = request.data['name_en']
-        if 'description' in request.data:
-            subcategory.description = request.data['description']
         subcategory.save()
         serializer = SubCategorySerializer(subcategory)
         headers = self.get_success_headers(serializer.data)
@@ -156,7 +100,6 @@ class ItemViewSet(viewsets.ModelViewSet):
         queryset = Item.objects.all().order_by('-is_featured', '-created_at')
         name = self.request.query_params.get('name', None)
         is_featured = self.request.query_params.get('is_featured', None)
-        type = self.request.query_params.get('type', None)
         category = self.request.query_params.get('category', None)
         subcategory = self.request.query_params.get('subcategory', None)
         company = self.request.query_params.get('company', None)
@@ -169,8 +112,6 @@ class ItemViewSet(viewsets.ModelViewSet):
                 name__icontains=string.capwords(name))).distinct()
         if is_featured is not None:
             queryset = queryset.filter(is_featured=True).distinct()
-        if type is not None:
-            queryset = queryset.filter(types__id=type).distinct()
         if category is not None:
             queryset = queryset.filter(categories__id=category).distinct()
         if subcategory is not None:
@@ -178,9 +119,9 @@ class ItemViewSet(viewsets.ModelViewSet):
                 subcategories__id=subcategory).distinct()
         if company is not None:
             queryset = queryset.filter(company__id=company).distinct()
-        # if tags is not None:
-        #     for tag in tags.split(","):
-        #         queryset = queryset.filter(tag__id=tag).distinct()
+        if tags is not None:
+            for tag in tags.split(","):
+                queryset = queryset.filter(tag__id=tag).distinct()
         if pricelow is not None:
             queryset = queryset.filter(price__gte=pricelow).distinct()
         if pricehigh is not None:
@@ -229,11 +170,6 @@ class ItemViewSet(viewsets.ModelViewSet):
         if 'company' in request.data:
             item.company = Company.objects.filter(
                 id=int(request.data['company']))[0]
-        if 'type' in request.data:
-            types = request.data['type'].split(',')
-            for t in types:
-                item.types.add(
-                    Type.objects.filter(id=int(t))[0])
         if 'category' in request.data:
             categories = request.data['category'].split(',')
             for c in categories:
@@ -244,10 +180,10 @@ class ItemViewSet(viewsets.ModelViewSet):
             for s in subcategories:
                 item.subcategories.add(
                     SubCategory.objects.filter(id=int(s))[0])
-        # if 'tags' in request.data:
-        #     tags = request.data['tags'].split(',')
-        #     for tag in tags:
-        #         item.tags.add(Tag.objects.filter(id=int(tag))[0])
+        if 'tags' in request.data:
+            tags = request.data['tags'].split(',')
+            for tag in tags:
+                item.tags.add(Tag.objects.filter(id=int(tag))[0])
         if 'image1' in request.data:
             item.image1 = request.data['image1']
         if 'image2' in request.data:
@@ -258,8 +194,6 @@ class ItemViewSet(viewsets.ModelViewSet):
             item.image4 = request.data['image4']
         if 'poster' in request.data:
             item.poster = request.data['poster']
-        if 'video' in request.data:
-            item.video = request.data['video']
         item.save()
         serializer = ItemSerializer(item)
         headers = self.get_success_headers(serializer.data)
@@ -305,12 +239,6 @@ class ItemViewSet(viewsets.ModelViewSet):
         if 'company' in request.data:
             item.company = Company.objects.filter(
                 id=int(request.data['company']))[0]
-        if 'type' in request.data:
-            item.types.clear()
-            types = request.data['type'].split(',')
-            for t in types:
-                item.types.add(
-                    Type.objects.filter(id=int(t))[0])
         if 'category' in request.data:
             item.categories.clear()
             categories = request.data['category'].split(',')
@@ -323,10 +251,10 @@ class ItemViewSet(viewsets.ModelViewSet):
             for s in subcategories:
                 item.subcategories.add(
                     SubCategory.objects.filter(id=int(s))[0])
-        # if 'tags' in request.data:
-        #     tags = request.data['tags'].split(',')
-        #     for tag in tags:
-        #         item.tags.add(Tag.objects.filter(id=int(tag))[0])
+        if 'tags' in request.data:
+            tags = request.data['tags'].split(',')
+            for tag in tags:
+                item.tags.add(Tag.objects.filter(id=int(tag))[0])
         if 'image1' in request.data:
             item.image1 = request.data['image1']
         if 'image2' in request.data:
@@ -337,8 +265,6 @@ class ItemViewSet(viewsets.ModelViewSet):
             item.image4 = request.data['image4']
         if 'poster' in request.data:
             item.poster = request.data['poster']
-        if 'video' in request.data:
-            item.video = request.data['video']
         item.save()
         serializer = ItemSerializer(item)
         headers = self.get_success_headers(serializer.data)

@@ -1,3 +1,4 @@
+from statistics import mode
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import ugettext_lazy as _
@@ -40,8 +41,9 @@ class CustomUser(AbstractUser):
     favorite = models.ManyToManyField(Item, null=True, blank=True)
     cart = models.ManyToManyField(CartItem, null=True, blank=True)
     level = models.IntegerField(default=1)
-    bonus = models.IntegerField(default=0)
+    bonus = models.IntegerField(default=1000)
     total = models.IntegerField(default=0)
+    bonus_collected = models.BooleanField(default=False)
 
     def __str__(self):
         return self.username
@@ -53,7 +55,8 @@ class Order(models.Model):
     customer = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     items = models.ManyToManyField(CartItem, null=True, blank=True)
     total = models.IntegerField(default=0)
-    bonus = models.IntegerField(default=0)
+    bonus_used = models.IntegerField(default=0)
+    bonus_granted = models.IntegerField(default=0)
     phone_number = models.CharField(max_length=30, null=True, blank=True)
     address = models.TextField(blank=True)
     is_delivered = models.BooleanField(default=False)

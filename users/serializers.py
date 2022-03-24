@@ -26,7 +26,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
         model = CustomUser
         fields = ['id', 'username', 'email', 'company_name',
                   'company_id', 'address', 'role', 'is_confirmed',
-                  'favorite', 'cart', 'level', 'bonus', 'total']
+                  'favorite', 'cart', 'level', 'bonus', 'total', 'bonus_collected']
 
 
 class CustomTokenSerializer(serializers.ModelSerializer):
@@ -72,5 +72,5 @@ class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = (
-            'id', 'ref', 'customer', 'items', 'total', 'bonus', 'phone_number', 'address', 'is_delivered', 'is_payed', 'created_at'
+            'id', 'ref', 'customer', 'items', 'total', 'bonus_used', 'bonus_granted', 'phone_number', 'address', 'is_delivered', 'is_payed', 'created_at'
         )

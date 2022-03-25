@@ -1,3 +1,4 @@
+from pyexpat import model
 from statistics import mode
 from django.conf import settings
 from django.db import models
@@ -78,7 +79,8 @@ class Item(models.Model):
         blank=True, null=True, db_column="storage_en")
     company = models.ForeignKey(
         Company, on_delete=models.CASCADE, null=True, blank=True)
-    categories = models.ManyToManyField(Category, null=True, blank=True)
+    category = models.ForeignKey(
+        Category, on_delete=models.CASCADE, null=True, blank=True)
     subcategories = models.ManyToManyField(SubCategory, null=True, blank=True)
     tags = models.ManyToManyField(Tag, null=True, blank=True)
     price = models.IntegerField(default=0)

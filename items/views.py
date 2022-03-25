@@ -106,14 +106,14 @@ class ItemViewSet(viewsets.ModelViewSet):
         tags = self.request.query_params.get('tags', None)
         pricelow = self.request.query_params.get('pricelow', None)
         pricehigh = self.request.query_params.get('pricehigh', None)
-        order = self.request.query_params.get('order', None)
+        sortby = self.request.query_params.get('sortby', None)
         if name is not None:
             queryset = queryset.filter(Q(name__icontains=name) | Q(
                 name__icontains=string.capwords(name))).distinct()
         if is_featured is not None:
             queryset = queryset.filter(is_featured=True).distinct()
         if category is not None:
-            queryset = queryset.filter(categories__id=category).distinct()
+            queryset = queryset.filter(category__id=category).distinct()
         if subcategory is not None:
             queryset = queryset.filter(
                 subcategories__id=subcategory).distinct()
@@ -126,8 +126,8 @@ class ItemViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(price__gte=pricelow).distinct()
         if pricehigh is not None:
             queryset = queryset.filter(price__lt=pricehigh).distinct()
-        if order is not None:
-            queryset = queryset.order_by(order)
+        if sortby is not None:
+            queryset = queryset.order_by(sortby)
         return queryset
 
     def create(self, request, *args, **kwargs):
@@ -171,10 +171,8 @@ class ItemViewSet(viewsets.ModelViewSet):
             item.company = Company.objects.filter(
                 id=int(request.data['company']))[0]
         if 'category' in request.data:
-            categories = request.data['category'].split(',')
-            for c in categories:
-                item.categories.add(
-                    Category.objects.filter(id=int(c))[0])
+            item.category = Category.objects.filter(
+                id=int(request.data['category']))[0]
         if 'subcategory' in request.data:
             subcategories = request.data['subcategory'].split(',')
             for s in subcategories:
@@ -240,11 +238,8 @@ class ItemViewSet(viewsets.ModelViewSet):
             item.company = Company.objects.filter(
                 id=int(request.data['company']))[0]
         if 'category' in request.data:
-            item.categories.clear()
-            categories = request.data['category'].split(',')
-            for c in categories:
-                item.categories.add(
-                    Category.objects.filter(id=int(c))[0])
+            item.category = Category.objects.filter(
+                id=int(request.data['category']))[0]
         if 'subcategory' in request.data:
             item.subcategories.clear()
             subcategories = request.data['subcategory'].split(',')

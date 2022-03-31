@@ -27,7 +27,7 @@ class CustomUser(AbstractUser):
     # phone_number
     username = models.CharField(max_length=20, unique=True)
     email = models.EmailField(
-        _('email address'), unique=False, null=True, blank=True)
+        _('email address'), unique=True)
 
     # REQUIRED_FIELDS = []
 

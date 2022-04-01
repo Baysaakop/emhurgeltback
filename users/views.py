@@ -1,3 +1,4 @@
+from tkinter import N
 from rest_framework import viewsets, status, pagination
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
@@ -20,7 +21,11 @@ class CustomUserViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = CustomUser.objects.all().order_by('id')
         is_confirmed = self.request.query_params.get('is_confirmed', None)
+        level = self.request.query_params.get('level', None)
         role = self.request.query_params.get('role', None)
+        sortby = self.request.query_params.get('sortby', None)
+        bonus_collected = self.request.query_params.get(
+            'bonus_collected', None)
         if is_confirmed is not None:
             if is_confirmed == "True":
                 queryset = queryset.filter(is_confirmed=True).distinct()
@@ -28,6 +33,15 @@ class CustomUserViewSet(viewsets.ModelViewSet):
                 queryset = queryset.filter(is_confirmed=False).distinct()
         if role is not None:
             queryset = queryset.filter(role=int(role)).distinct()
+        if level is not None:
+            queryset = queryset.filter(level=int(level)).distinct()
+        if bonus_collected is not None:
+            if bonus_collected == "True":
+                queryset = queryset.filter(bonus_collected=True).distinct()
+            else:
+                queryset = queryset.filter(bonus_collected=False).distinct()
+        if sortby is not None:
+            queryset = queryset.order_by(sortby)
         return queryset
 
     def update(self, request, *args, **kwargs):
@@ -68,6 +82,14 @@ class CustomUserViewSet(viewsets.ModelViewSet):
                 cartitem.save()
             elif mode == "delete":
                 customuser.cart.all().filter(item=item).first().delete()
+        if 'bonus_collected' in request.data:
+            type = request.data['type']
+            if customuser.bonus_collected == False:
+                customuser.bonus_collected = True
+                if type == "bonus":
+                    customuser.bonus += 2500000
+            else:
+                return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
         customuser.save()
         serializer = CustomUserSerializer(customuser)
         headers = self.get_success_headers(serializer.data)
@@ -84,7 +106,7 @@ def getLevel(total):
 
 
 class OrderPagination(pagination.PageNumberPagination):
-    page_size = 24
+    page_size = 36
 
 
 class OrderViewSet(viewsets.ModelViewSet):
@@ -96,6 +118,9 @@ class OrderViewSet(viewsets.ModelViewSet):
         queryset = Order.objects.all().order_by('-created_at')
         customer = self.request.query_params.get('customer', None)
         is_payed = self.request.query_params.get('is_payed', None)
+        datemin = self.request.query_params.get('datemin', None)
+        datemax = self.request.query_params.get('datemax', None)
+        sortby = self.request.query_params.get('sortby', None)
         if customer is not None:
             queryset = queryset.filter(
                 customer__id=customer).distinct().order_by('-created_at')
@@ -106,6 +131,11 @@ class OrderViewSet(viewsets.ModelViewSet):
             else:
                 queryset = queryset.filter(
                     is_payed=False).distinct().order_by('-created_at')
+        if datemin is not None and datemax is not None:
+            queryset = queryset.filter(
+                created_at__range=[datemin, datemax]).distinct().order_by('-created_at')
+        if sortby is not None:
+            queryset = queryset.order_by(sortby)
         return queryset
 
     def create(self, request, *args, **kwargs):
@@ -151,6 +181,8 @@ class OrderViewSet(viewsets.ModelViewSet):
                 if level == 2:
                     order.customer.bonus += 300000
             order.customer.save()
+        if 'is_delivered' in request.data and request.data['is_delivered'] == True:
+            order.is_delivered = True
         order.save()
         serializer = OrderSerializer(order)
         headers = self.get_success_headers(serializer.data)

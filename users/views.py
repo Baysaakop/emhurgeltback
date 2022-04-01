@@ -1,4 +1,3 @@
-from tkinter import N
 from rest_framework import viewsets, status, pagination
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token

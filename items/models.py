@@ -5,20 +5,20 @@ from django.db import models
 from django.conf import settings
 
 
-def company_directory_path(filename):
-    return 'companies/{0}'.format(filename)
+def company_directory_path(instance, filename):
+    return 'companies/{0}/{1}'.format(instance.id, filename)
 
 
 def item_directory_path(instance, filename):
-    return 'items/{0}/{1}'.format(instance.name, filename)
+    return 'items/{0}/{1}'.format(instance.id, filename)
 
 
-def poster_directory_path(filename):
-    return 'posters/{0}'.format(filename)
+def poster_directory_path(instance, filename):
+    return 'posters/{0}/{1}'.format(instance.id, filename)
 
 
-def slider_directory_path(filename):
-    return 'sliders/{0}'.format(filename)
+def slider_directory_path(instance, filename):
+    return 'sliders/{0}/{1}'.format(instance.id, filename)
 
 
 class Company(models.Model):

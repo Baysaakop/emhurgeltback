@@ -1,3 +1,4 @@
+from asyncio.windows_events import NULL
 import string
 from rest_framework import viewsets, status
 from rest_framework.response import Response
@@ -100,6 +101,7 @@ class ItemViewSet(viewsets.ModelViewSet):
         queryset = Item.objects.all().order_by('-is_featured', '-created_at')
         name = self.request.query_params.get('name', None)
         is_featured = self.request.query_params.get('is_featured', None)
+        poster = self.request.query_params.get('poster', None)
         category = self.request.query_params.get('category', None)
         subcategory = self.request.query_params.get('subcategory', None)
         company = self.request.query_params.get('company', None)
@@ -110,8 +112,10 @@ class ItemViewSet(viewsets.ModelViewSet):
         if name is not None:
             queryset = queryset.filter(Q(name__icontains=name) | Q(
                 name__icontains=string.capwords(name))).distinct()
-        if is_featured is not None:
+        if is_featured is not None and is_featured == "true":
             queryset = queryset.filter(is_featured=True).distinct()
+            if poster is not None and poster == "true":
+                queryset = queryset.exclude(poster='').distinct()
         if category is not None:
             queryset = queryset.filter(category__id=category).distinct()
         if subcategory is not None:

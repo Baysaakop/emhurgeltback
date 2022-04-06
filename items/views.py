@@ -1,8 +1,6 @@
-from asyncio.windows_events import NULL
 import string
 from rest_framework import viewsets, status
 from rest_framework.response import Response
-from rest_framework.authtoken.models import Token
 from django.db.models import Q
 from .models import Company, Category, SubCategory, Tag, Item, Slider, Video
 from .serializers import CompanySerializer, CategorySerializer, SubCategorySerializer, TagSerializer, ItemSerializer, SliderSerializer, VideoSerializer

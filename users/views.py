@@ -10,7 +10,7 @@ from items.models import Item
 
 class CartItemViewSet(viewsets.ModelViewSet):
     serializer_class = CartItemSerializer
-    queryset = CartItem.objects.all().order_by('id')
+    queryset = CartItem.objects.all().order_by('-id')
 
 
 class CustomUserViewSet(viewsets.ModelViewSet):
@@ -76,7 +76,7 @@ class CustomUserViewSet(viewsets.ModelViewSet):
                 )
                 customuser.cart.add(cartitem)
             elif mode == "update":
-                cartitem = customuser.cart.all().filter(item=item).first()
+                cartitem = customuser.cart.all().get(item=item)
                 cartitem.count = count
                 cartitem.save()
             elif mode == "delete":
@@ -192,6 +192,6 @@ class OrderViewSet(viewsets.ModelViewSet):
         for cartitem in order.items.all():
             cartitem.item.count += cartitem.count
             cartitem.item.save()
-        order.customer.bonus += order.bonus
+        order.customer.bonus += order.bonus_used
         order.customer.save()
         return super().destroy(request, *args, **kwargs)

@@ -147,23 +147,23 @@ class OrderViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         customer = Token.objects.get(key=request.data['token']).user
-        total = int(request.data['total'])
+        # total = int(request.data['total'])
         bonus_used = int(request.data['bonus_used'])
         if (customer.bonus >= bonus_used):
             order = Order.objects.create(
                 customer=customer,
-                total=total,
+                # total=total,
                 bonus_used=bonus_used,
                 phone_number=request.data['phone_number'],
                 address=request.data['address']
             )
-            # total = 0
+            total = 0
             for cartitem in customer.cart.all():
                 order.items.add(cartitem)
                 cartitem.item.count -= cartitem.count
                 cartitem.item.save()
-                # total += cartitem.item.price * cartitem.count
-            # order.total = total
+                total += cartitem.item.price * cartitem.count
+            order.total = total
             order.save()
             customer.cart.clear()
             customer.bonus -= bonus_used

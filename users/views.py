@@ -117,6 +117,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         queryset = Order.objects.all().order_by('-created_at')
         customer = self.request.query_params.get('customer', None)
         is_payed = self.request.query_params.get('is_payed', None)
+        is_delivered = self.request.query_params.get('is_delivered', None)
         datemin = self.request.query_params.get('datemin', None)
         datemax = self.request.query_params.get('datemax', None)
         sortby = self.request.query_params.get('sortby', None)
@@ -130,6 +131,13 @@ class OrderViewSet(viewsets.ModelViewSet):
             else:
                 queryset = queryset.filter(
                     is_payed=False).distinct().order_by('-created_at')
+        if is_delivered is not None:
+            if is_delivered == "True":
+                queryset = queryset.filter(
+                    is_delivered=True).distinct().order_by('-created_at')
+            else:
+                queryset = queryset.filter(
+                    is_delivered=False).distinct().order_by('-created_at')
         if datemin is not None and datemax is not None:
             queryset = queryset.filter(
                 created_at__range=[datemin, datemax]).distinct().order_by('-created_at')

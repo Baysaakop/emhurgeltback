@@ -22,6 +22,9 @@ class CartItem(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     count = models.IntegerField(default=1)
 
+    def __str__(self):
+        return self.item.name + " ~ " + str(self.count)
+
 
 class CustomUser(AbstractUser):
     # phone_number

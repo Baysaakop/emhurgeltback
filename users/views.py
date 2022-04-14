@@ -149,10 +149,13 @@ class OrderViewSet(viewsets.ModelViewSet):
                 phone_number=request.data['phone_number'],
                 address=request.data['address']
             )
+            # total = 0
             for cartitem in customer.cart.all():
                 order.items.add(cartitem)
                 cartitem.item.count -= cartitem.count
                 cartitem.item.save()
+                # total += cartitem.item.price * cartitem.count
+            # order.total = total
             order.save()
             customer.cart.clear()
             customer.bonus -= bonus_used

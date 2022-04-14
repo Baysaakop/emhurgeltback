@@ -23,7 +23,7 @@ class CartItem(models.Model):
     count = models.IntegerField(default=1)
 
     def __str__(self):
-        return self.item.name + " ~ " + str(self.count)
+        return str(self.id) + ". " + self.item.name + " ~ " + str(self.count)
 
 
 class CustomUser(AbstractUser):
